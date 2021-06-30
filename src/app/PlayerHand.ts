@@ -18,15 +18,19 @@ export class PlayerHand {
     double(card: Card) {
         this.cards.push(card)
     }
-    isSplitable = (): boolean => this.cards[0] === this.cards[1]
-    split(placeId: number): PlayerHand {
-        let newHand = new PlayerHand(placeId)
-        if (this.cards.length !== 0) {
-            newHand.cards.push(this.cards.shift()!)
-        } else {
-            throw new Error("Haven't card")
+    isSplitable(): boolean{
+        if (this.cards.length === 2) {
+            return this.cards[0].rank === this.cards[1].rank
         }
-        return newHand
+        throw new Error('have not first or second cards')
+    }
+    split(): PlayerHand {
+        let newHand = new PlayerHand(this.placeId)
+        if (this.isSplitable()) {
+            newHand.cards.push(this.cards.shift()!)
+            return newHand
+        }
+        throw new Error("Haven't card")
     }
     stand() {
         this.isStand = true
