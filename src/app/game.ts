@@ -29,8 +29,10 @@ export class Game {
     }
     getPlace(placeId: number): TablePlace {
         const place = this.places.find((place) => place.id === placeId)
-        if (place) return place
-        else throw new Error("place not find")
+        if (place) {
+            return place
+        }
+        throw new Error("place not find")
     }
     setPlace(playerId: string, placeId: number) {
         const place = this.getPlace(placeId)
@@ -79,7 +81,9 @@ export class Game {
     handsHasBet(): Array<PlayerHand> {
         let hands: Array<PlayerHand> = []
         this.places.forEach((place) => {
-            place.bet > 0 && hands.push(...place.hands)
+            if (place.bet > 0) {
+                hands.push(...place.hands)
+            }
         })
         return hands
     }
@@ -98,6 +102,15 @@ export class Game {
             this.dealer.hand.takeCard(this.deck.takeCard())
         }
     }
+
+    getPlayer(playerId: string): Player {
+        const player = this.players.find((player) => playerId === player.id)
+        if (player) {
+            return player
+        }
+        throw new Error("player not found")
+    }
+
     getPlayerResult(playerHandVal: number, dealerHandVal: number): "win" | "tie" | "lose" {
         if (playerHandVal === dealerHandVal) {
             return "tie"
@@ -111,13 +124,12 @@ export class Game {
         hands.forEach((hand) => {
             const result = this.getPlayerResult(hand.score, this.dealer.hand.score)
             if (result === "win") {
-                const place = this.places.find((place) => place.id === hand.placeId)!
-                const player = this.players.find((player) => place?.playerID === player.id)
-                player?.addChips(place.bet * 2)
+                const place = this.getPlace(hand.placeId)
+                const player = this.getPlayer(place.playerID!)
+                player.addChips(place.bet * 2)
             } else if (result === "tie") {
                 const place = this.places.find((place) => place.id === hand.placeId)!
-                const player = this.players.find((player) => place?.playerID === player.id)
-                player?.addChips(place.bet)
+                this.player.addChips(place.bet)
             }
         })
     }
