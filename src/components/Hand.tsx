@@ -17,7 +17,7 @@ export default observer(({ hand, deck, place }: HandProps) => {
         hand.double(card)
     }
     const split = () => {
-        hand.split(place.id)
+        hand.split()
     }
     const stand = () => {
         hand.stand()

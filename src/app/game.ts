@@ -65,7 +65,7 @@ export class Game {
     }
     split(placeId: number, handIdx: number) {
         const place = this.places.find((place) => place.id === placeId)
-        place?.hands.push(place?.hands[handIdx].split(placeId))
+        place?.hands.push(place?.hands[handIdx].split())
     }
     addPlace(id: number): void {
         this.places.push(new TablePlace(id))
