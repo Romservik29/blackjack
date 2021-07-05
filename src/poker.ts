@@ -28,16 +28,18 @@ const places: Array<{ place: TablePlace, position: Vector3 }> = []
 export const createRoom = (canvas: HTMLCanvasElement) => {
     const engine = new Engine(canvas)
     const scene = new Scene(engine)
-    const camera = new UniversalCamera('camera1', new Vector3(0, 2.5, 1.7), scene)
-    // const camera = new ArcRotateCamera('camera', Math.PI/6, Math.PI, 1.5, new Vector3(0, 0, 0), scene)
+    const camera = new UniversalCamera('camera1', new Vector3(0, 2.5, 2), scene)
+    // const camera = new ArcRotateCamera('camera', Math.PI/6, Math.PI, 1.5, new Vector3(0, 2.5, 1.7), scene)
     // camera.upperBetaLimit = Math.PI / 2.2;
     camera.attachControl(true)
     const light = new HemisphericLight('HemiLght', new Vector3(0, 100, 0), scene)
-    light.intensity = 0.5
+    light.intensity = 1
     //------------------------------------------------------------//
-    createFloor(scene)
+    const floor = createFloor(scene)
     const table = createTable(scene)
-    table.position = new Vector3(0, 1, 0)
+    table.position = new Vector3(0, 0.7, 0)
+    const dealer = createDealer(scene)
+    
     game.places.push(new TablePlace(0))
     let meshes: Array<Mesh> = []
     autorun(() => {
@@ -53,17 +55,11 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
             tableplace.parent = table;
             tableplace.position.y = 1
             tableplace.position.z = -0.001
-            camera.setTarget(tableplace.getAbsolutePosition())
             meshes.push(tableplace)
         })
     })
-    const card1 = createCard()
-    card1.parent = table
-    const card2 = createCard()
-    card2.parent = table
-    card2.position.y = 0.002
-    card1.position.y = 0.002
-    dealCard([card1, card2], scene)
+
+    camera.setTarget(dealer.position)
     engine.runRenderLoop(() => {
         scene.render()
     })
@@ -122,18 +118,14 @@ function createFloor(scene: Scene) {
     ground.material = mat;
     return ground
 }
-function createEnv(scene: Scene) {
-    const roomBox = BABYLON.MeshBuilder.CreateBox("roomBox", { width: 300, height: 250, depth: 250 }, scene);
-    const roomBoxMaterial = new BABYLON.StandardMaterial("wallMat", scene);
-    roomBoxMaterial.backFaceCulling = false;
-    roomBoxMaterial.reflectionTexture = new BABYLON.CubeTexture('/textures/wall', scene);
-    roomBoxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
-    roomBoxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
-    roomBoxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
-    roomBox.material = roomBoxMaterial;
-    return roomBox
+function createDealer(scene: Scene): Mesh{
+    const panel = MeshBuilder.CreatePlane('dealerPlane', { height: 1.2, width: 1.2, sideOrientation: 1})
+    panel.position = new Vector3(0,1,-1.5);
+    const material = new StandardMaterial('dealerMat', scene)
+    material.diffuseTexture = new Texture('./textures/dealer.png', scene)
+    panel.material = material
+    return panel
 }
-
 
 function createTable(scene: Scene) {
     const disc = BABYLON.MeshBuilder.CreateDisc("disc", { radius: 1.2, tessellation: 64 });
@@ -146,7 +138,10 @@ function createTable(scene: Scene) {
     borderTable.rotation.x = Math.PI / 2
     return disc;
 }
-
+function CreateDeck(): Mesh{
+    const box = MeshBuilder.CreateBox('deck',{size: 0.35} )
+    return box
+}
 
 function moveCardX() {
     const animation = new BABYLON.Animation(
