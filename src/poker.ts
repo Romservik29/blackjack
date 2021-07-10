@@ -14,12 +14,15 @@ import {
     DynamicTexture,
     FreeCamera,
     UniversalCamera,
+    ExecuteCodeAction,
+    ActionManager,
 } from "@babylonjs/core";
 import * as BABYLON from '@babylonjs/core'
 import { autorun } from 'mobx';
 import { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import { Card } from './app/Card';
 import { createReadStream } from 'fs';
+import { table } from 'console';
 
 const game = new Game("Hero", "1234", 5000)
 
@@ -39,26 +42,12 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
     const table = createTable(scene)
     table.position = new Vector3(0, 0.7, 0)
     const dealer = createDealer(scene)
-    
-    game.places.push(new TablePlace(0))
-    let meshes: Array<Mesh> = []
-    autorun(() => {
-        let posX = 0
-        let posY = 0
-        let posZ = 0
-        meshes.forEach((mesh) => {
-            mesh.dispose()
-        })
-        game.places.forEach((place) => {
-            places.push({ place, position: new Vector3(posX, posY, posZ) })
-            const tableplace = CreatePlace(scene, "Andrey12y78126381783iuhwkdhkjwekdhjk")
-            tableplace.parent = table;
-            tableplace.position.y = 1
-            tableplace.position.z = -0.001
-            meshes.push(tableplace)
-        })
-    })
-
+    const place1 = CreatePlace(scene, table)
+    place1.position = new Vector3((-0.5), 0.65, (-0.001))
+    const place2 = CreatePlace(scene, table)
+    place2.position = new Vector3(0, 0.65, (-0.001))
+    const place3 = CreatePlace(scene, table)
+    place3.position = new Vector3(0.5, 0.65, (-0.001))
     camera.setTarget(dealer.position)
     engine.runRenderLoop(() => {
         scene.render()
@@ -89,22 +78,38 @@ async function createAnimationCard(card: Mesh, scene: Scene) {
     await anim.waitAsync()
 }
 
-function CreatePlace(scene: Scene, playerName: string) {
+function CreatePlace(scene: Scene, parentMesh: Mesh, playerId = "Hello") {
     const place = MeshBuilder.CreateDisc('place', { radius: 0.1, tessellation: 64 })
-
+    place.parent = parentMesh
     let mat = new StandardMaterial('placeMat', scene)
     mat.diffuseColor = Color3.Yellow()
     place.material = mat
-    // const namePlane = BABYLON.MeshBuilder.CreatePlane('place', { width: 0.2, height: 0.5 })
-    // namePlane.parent = place
-    // const font = "bold 20px monospace";
-    // const textureName = new DynamicTexture('textureName', { width: 512, height: 256, subdivisions: 25 }, scene, true);
-    // const nameMat = new StandardMaterial("nameMat", scene);
-    // namePlane.material = nameMat
-    // nameMat.diffuseTexture = textureName
-    // textureName.drawText(playerName, 20, 20, font, "black", "green")
+    const planeWidth = 0.3;
+    const planeHeight = 0.07;
+    const namePlane = BABYLON.MeshBuilder.CreatePlane('place', { width: planeWidth, height: planeHeight })
+    namePlane.parent = place
+    namePlane.position.y = 0.15
+
+    namePlane.rotation.z = Math.PI
+    var DTWidth = 512;
+    var DTHeight = 172;
+    const textureName = new DynamicTexture('textureName', { width: DTWidth, height: DTHeight }, scene, true);
+    const text = "seat"
+    var font = "64px monospace";
+    const nameMat = new StandardMaterial("nameMat", scene);
+    nameMat.diffuseTexture = textureName
+    namePlane.material = nameMat
+    textureName.drawText(text, null, null, font, "black", "white", true)
+    place.actionManager = new ActionManager(scene)
+    place.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
+        textureName.clear()
+        textureName.drawText(playerId, null, null, font, "black", "white", true)
+        // const constrols = createControls(scene)
+        createControls(scene).hitBtn.parent = namePlane
+    }))
     return place
 }
+
 function createCard(): Mesh {
     const cardMesh = MeshBuilder.CreateBox('card', { width: 0.03, height: 0.1, depth: 0.005 })
     return cardMesh
@@ -118,9 +123,9 @@ function createFloor(scene: Scene) {
     ground.material = mat;
     return ground
 }
-function createDealer(scene: Scene): Mesh{
-    const panel = MeshBuilder.CreatePlane('dealerPlane', { height: 1.2, width: 1.2, sideOrientation: 1})
-    panel.position = new Vector3(0,1,-1.5);
+function createDealer(scene: Scene): Mesh {
+    const panel = MeshBuilder.CreatePlane('dealerPlane', { height: 1.2, width: 1.2, sideOrientation: 1 })
+    panel.position = new Vector3(0, 1, -1.5);
     const material = new StandardMaterial('dealerMat', scene)
     material.diffuseTexture = new Texture('./textures/dealer.png', scene)
     panel.material = material
@@ -138,8 +143,68 @@ function createTable(scene: Scene) {
     borderTable.rotation.x = Math.PI / 2
     return disc;
 }
-function CreateDeck(): Mesh{
-    const box = MeshBuilder.CreateBox('deck',{size: 0.35} )
+function createControls(scene: Scene) {
+    const hitBtn = createHitButton(scene)
+    const doubleBtn = createDoubleButton(scene)
+    doubleBtn.parent = hitBtn
+    doubleBtn.position.x = 0.05
+    const splitBtn = createSplitButton(scene)
+    splitBtn.parent = doubleBtn
+    splitBtn.position.x = 0.05
+    const standBtn = createStandButton(scene)
+    standBtn.parent = splitBtn
+    standBtn.position.x = 0.05
+
+    return { hitBtn, doubleBtn, splitBtn, standBtn }
+
+    function createHitButton(scene: Scene) {
+        const plane = BABYLON.MeshBuilder.CreatePlane('hitBtn', { width: 0.05, height: 0.05 })
+        const material = new StandardMaterial('hitMat', scene)
+        material.diffuseColor = Color3.Green()
+        plane.material = material
+        plane.actionManager = new ActionManager(scene)
+        plane.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, () => {
+            alert("hit")
+        }))
+        return plane
+    }
+    function createDoubleButton(scene: Scene) {
+        const plane = MeshBuilder.CreatePlane('hitBtn', { width: 0.05, height: 0.05 })
+        const material = new StandardMaterial('doubleMat', scene)
+        material.diffuseColor = Color3.Yellow()
+        plane.material = material
+        plane.actionManager = new ActionManager(scene)
+        plane.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
+            alert("double")
+        }))
+        return plane
+    }
+    function createSplitButton(scene: Scene) {
+        const plane = MeshBuilder.CreatePlane('hitBtn', { width: 0.05, height: 0.05 })
+        const material = new StandardMaterial('hitMat', scene)
+        material.diffuseColor = Color3.Blue()
+        plane.material = material
+        plane.actionManager = new ActionManager(scene)
+        plane.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
+            alert("split")
+        }))
+        return plane
+    }
+    function createStandButton(scene: Scene) {
+        const plane = BABYLON.MeshBuilder.CreatePlane('hitBtn', { width: 0.05, height: 0.05 })
+        const material = new StandardMaterial('material', scene)
+        material.diffuseColor = Color3.Red()
+        plane.material = material
+        plane.actionManager = new ActionManager(scene)
+        plane.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
+            alert("stand")
+        }))
+        return plane
+    }
+}
+
+function CreateDeck(): Mesh {
+    const box = MeshBuilder.CreateBox('deck', { size: 0.35 })
     return box
 }
 
