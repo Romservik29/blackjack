@@ -1,4 +1,4 @@
-import { Game } from './app/game';
+import { Game, GameStatus } from './app/game';
 import { TablePlace } from './app/TablePlace';
 import {
     Vector3,
@@ -18,7 +18,7 @@ import {
     ActionManager,
 } from "@babylonjs/core";
 import * as BABYLON from '@babylonjs/core'
-import { autorun } from 'mobx';
+import { autorun, reaction } from 'mobx';
 import { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import { Card } from './app/Card';
 
@@ -73,16 +73,50 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
         cards.push({ mesh: card, position: place.position })
         cards.push({ mesh: card2, position: position2 })
     })
-    dealCard(cards, scene)
-    // autorun(() => {
-    //     if(game.hasBet()){
-    //         game.deal()
-
-    //     }
-    // })
 
 
-
+    setTimeout(() => {
+        game.addPlace(0)
+        game.places[0].betChips(100)
+    }, 1000)
+    reaction(
+        () => game.hasBet(),
+        hasBet => {
+            if (hasBet) {
+                const timer = setTimeout(() => {
+                    game.status = GameStatus.DEALING
+                }, 10000)
+            }
+        }
+    )
+    reaction(
+        () => game.status,
+        status => {
+            switch (status) {
+                case GameStatus.WAITING_BETS: {
+                    console.log(GameStatus.WAITING_BETS)
+                    break;
+                }
+                case GameStatus.DEALING: {
+                    console.log(GameStatus.DEALING)
+                    break;
+                }
+                case GameStatus.PLAYING_PLAYERS: {
+                    console.log(GameStatus.PLAYING_PLAYERS)
+                    break;
+                }
+                case GameStatus.PLAYING_DEALER: {
+                    console.log(GameStatus.PLAYING_DEALER)
+                    break;
+                }
+                case GameStatus.CULC_FINAL_RESULT: {
+                    console.log(GameStatus.CULC_FINAL_RESULT)
+                    break;
+                }
+                default: return
+            }
+        }
+    )
     engine.runRenderLoop(() => {
         scene.render()
     })
