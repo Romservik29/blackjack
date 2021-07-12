@@ -49,9 +49,9 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
     place3.position = new Vector3(0.5, 0.65, (-0.001))
     const places = [place1, place2, place3]
     //-------------------Deck--------------------------------//
-    const deck = CreateDeck()
-    deck.parent = table
-    deck.position = new Vector3((-0.65), 0, (-0.5))
+    // const deck = CreateDeck()
+    // deck.parent = table
+    // deck.position = new Vector3((-0.65), 0, (-0.5))
     //
     camera.setTarget(dealer.position)
     const chip = createChips(scene)
@@ -61,9 +61,17 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
     const cards: Array<{ mesh: Mesh, position: Vector3 }> = []
     places.forEach((place) => {
         const card = createCard()
+        card.parent = table
+        card.rotation.x = Math.PI / 2
         const card2 = createCard()
-        cards.push({ mesh: card, position: place.getAbsolutePosition() })
-        cards.push({ mesh: card2, position: place.getAbsolutePosition() })
+        card2.parent = table
+        card2.rotation.x = Math.PI / 2
+        const placeAbsPos = place.getAbsolutePosition()
+        const position2 = new Vector3(placeAbsPos.x, placeAbsPos.y, placeAbsPos.z)
+        position2.x -= 0.05
+        position2.y -= 0.05
+        cards.push({ mesh: card, position: place.position })
+        cards.push({ mesh: card2, position: position2 })
     })
     dealCard(cards, scene)
     // autorun(() => {
@@ -94,8 +102,12 @@ async function createAnimationCard(card: Mesh, position: Vector3, scene: Scene) 
         frame: 0,
         value: card.getAbsolutePosition()
     });
+    // keyFrames.push({
+    //     frame: frameRate,
+    //     value: position
+    // });
     keyFrames.push({
-        frame: frameRate,
+        frame: frameRate * 2,
         value: position
     });
     animationX.setKeys(keyFrames);
