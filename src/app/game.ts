@@ -19,6 +19,7 @@ export class Game {
     status: GameStatus;
     players: Array<Player> = [];
     places: Array<TablePlace> = [];
+    timer: number = 0;
     constructor(dealerName: string, playerID: string, chips = 5000, deck = new Deck()) {
         this.player = new Player(playerID, chips)
         this.players.push(this.player)
@@ -26,6 +27,15 @@ export class Game {
         this.deck = deck
         this.status = GameStatus.WAITING_BETS
         makeAutoObservable(this)
+    }
+    setTimer(time: number) {
+        this.timer = time
+        const timer = setTimeout(() => {
+            if (this.timer === 0) {
+                clearInterval(timer)
+            }
+            this.timer -= 1
+        }, 1000)
     }
     getPlace(placeId: number): TablePlace {
         const place = this.places.find((place) => place.id === placeId)
@@ -78,7 +88,7 @@ export class Game {
         newDeck.shuffle()
         this.deck = newDeck
     }
-    handsHasBet(): Array<PlayerHand> {
+    getHandsHasBet(): Array<PlayerHand> {
         let hands: Array<PlayerHand> = []
         this.places.forEach((place) => {
             if (place.bet > 0) {
@@ -86,6 +96,9 @@ export class Game {
             }
         })
         return hands
+    }
+    hasBet(): boolean {
+        return this.places.some((place) => place.bet > 0)
     }
     deal(): void {
         this.places.forEach(place => {
@@ -120,7 +133,7 @@ export class Game {
         return "lose"
     }
     culcFinalResult(): void {
-        const hands = this.handsHasBet()
+        const hands = this.getHandsHasBet()
         hands.forEach((hand) => {
             const result = this.getPlayerResult(hand.score, this.dealer.hand.score)
             if (result === "win") {
