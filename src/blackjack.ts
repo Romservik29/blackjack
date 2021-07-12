@@ -100,14 +100,10 @@ async function createAnimationCard(card: Mesh, position: Vector3, scene: Scene) 
     const keyFrames = [];
     keyFrames.push({
         frame: 0,
-        value: card.getAbsolutePosition()
+        value: card.position
     });
-    // keyFrames.push({
-    //     frame: frameRate,
-    //     value: position
-    // });
     keyFrames.push({
-        frame: frameRate * 2,
+        frame: frameRate,
         value: position
     });
     animationX.setKeys(keyFrames);
