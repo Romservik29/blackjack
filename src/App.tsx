@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef} from "react";
 import "./App.css";
-import {createRoom} from "./poker"
+import {createRoom} from "./blackjack"
 import BlackJack from './components/BlackJack'
 
 export default function App(): JSX.Element {

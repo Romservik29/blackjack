@@ -21,17 +21,15 @@ import * as BABYLON from '@babylonjs/core'
 import { autorun } from 'mobx';
 import { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import { Card } from './app/Card';
-import { createReadStream } from 'fs';
-import { table } from 'console';
+
 
 const game = new Game("Hero", "1234", 5000)
-
-const places: Array<{ place: TablePlace, position: Vector3 }> = []
 
 export const createRoom = (canvas: HTMLCanvasElement) => {
     const engine = new Engine(canvas)
     const scene = new Scene(engine)
-    const camera = new UniversalCamera('camera1', new Vector3(0, 2.5, 2), scene)
+    const camera = new UniversalCamera
+        ('camera1', new Vector3(0, 2.5, 2), scene)
     // const camera = new ArcRotateCamera('camera', Math.PI/6, Math.PI, 1.5, new Vector3(0, 2.5, 1.7), scene)
     // camera.upperBetaLimit = Math.PI / 2.2;
     camera.attachControl(true)
@@ -42,43 +40,73 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
     const table = createTable(scene)
     table.position = new Vector3(0, 0.7, 0)
     const dealer = createDealer(scene)
-    const place1 = CreatePlace(scene, table)
+    //-------------------Places---------------------------------//
+    const place1 = CreatePlace(scene, table, game.player.id)
     place1.position = new Vector3((-0.5), 0.65, (-0.001))
-    const place2 = CreatePlace(scene, table)
+    const place2 = CreatePlace(scene, table, game.player.id)
     place2.position = new Vector3(0, 0.65, (-0.001))
-    const place3 = CreatePlace(scene, table)
+    const place3 = CreatePlace(scene, table, game.player.id)
     place3.position = new Vector3(0.5, 0.65, (-0.001))
+    const places = [place1, place2, place3]
+    //-------------------Deck--------------------------------//
+    const deck = CreateDeck()
+    deck.parent = table
+    deck.position = new Vector3((-0.65), 0, (-0.5))
+    //
     camera.setTarget(dealer.position)
+    const chip = createChips(scene)
+    chip.parent = table
+    chip.rotation.x = Math.PI / 2
+    chip.position.z = -0.5
+    const cards: Array<{ mesh: Mesh, position: Vector3 }> = []
+    places.forEach((place) => {
+        const card = createCard()
+        const card2 = createCard()
+        cards.push({ mesh: card, position: place.getAbsolutePosition() })
+        cards.push({ mesh: card2, position: place.getAbsolutePosition() })
+    })
+    dealCard(cards, scene)
+    // autorun(() => {
+    //     if(game.hasBet()){
+    //         game.deal()
+
+    //     }
+    // })
+
+
+
     engine.runRenderLoop(() => {
         scene.render()
     })
+
 }
 
-async function dealCard(cards: Array<Mesh>, scene: Scene) {
+async function dealCard(cards: Array<{ mesh: Mesh, position: Vector3 }>, scene: Scene,) {
     for (const card of cards) {
-        await createAnimationCard(card, scene)
+        await createAnimationCard(card.mesh, card.position, scene)
     }
 }
-async function createAnimationCard(card: Mesh, scene: Scene) {
-    const frameRate = 60
-    const xSlide = new BABYLON.Animation("xSlide", "position.y", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+async function createAnimationCard(card: Mesh, position: Vector3, scene: Scene) {
+    const frameRate = 30
+    const animationX = new BABYLON.Animation("animationX", "position", frameRate, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
     const keyFrames = [];
     keyFrames.push({
         frame: 0,
-        value: 0
+        value: card.getAbsolutePosition()
     });
-
     keyFrames.push({
         frame: frameRate,
-        value: 0.5
+        value: position
     });
-    xSlide.setKeys(keyFrames);
-    card.animations.push(xSlide);
-    const anim = scene.beginAnimation(card, 0, 2 * frameRate, false);
+    animationX.setKeys(keyFrames);
+    const easingFunction = new BABYLON.BezierCurveEase();
+    animationX.setEasingFunction(easingFunction)
+    card.animations.push(animationX);
+    const anim = scene.beginAnimation(card, 0, frameRate, false);
     await anim.waitAsync()
 }
 
-function CreatePlace(scene: Scene, parentMesh: Mesh, playerId = "Hello") {
+function CreatePlace(scene: Scene, parentMesh: Mesh, playerName: string) {
     const place = MeshBuilder.CreateDisc('place', { radius: 0.1, tessellation: 64 })
     place.parent = parentMesh
     let mat = new StandardMaterial('placeMat', scene)
@@ -92,7 +120,7 @@ function CreatePlace(scene: Scene, parentMesh: Mesh, playerId = "Hello") {
 
     namePlane.rotation.z = Math.PI
     var DTWidth = 512;
-    var DTHeight = 172;
+    var DTHeight = 120;
     const textureName = new DynamicTexture('textureName', { width: DTWidth, height: DTHeight }, scene, true);
     const text = "seat"
     var font = "64px monospace";
@@ -100,22 +128,25 @@ function CreatePlace(scene: Scene, parentMesh: Mesh, playerId = "Hello") {
     nameMat.diffuseTexture = textureName
     namePlane.material = nameMat
     textureName.drawText(text, null, null, font, "black", "white", true)
-    place.actionManager = new ActionManager(scene)
-    place.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
+    namePlane.actionManager = new ActionManager(scene)
+    namePlane.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
         textureName.clear()
-        textureName.drawText(playerId, null, null, font, "black", "white", true)
-        // const constrols = createControls(scene)
-        createControls(scene).hitBtn.parent = namePlane
+        textureName.drawText(playerName, null, null, font, "black", "white", true)
+        const constrols = createControls(scene)
+        const btns = createControls(scene)
+        btns.hitBtn.parent = namePlane
+        btns.hitBtn.position.y = -0.1
+
     }))
     return place
 }
 
 function createCard(): Mesh {
-    const cardMesh = MeshBuilder.CreateBox('card', { width: 0.03, height: 0.1, depth: 0.005 })
+    const cardMesh = MeshBuilder.CreateBox('card', { width: 0.07, height: 0.01, depth: 0.1 })
     return cardMesh
 }
 
-function createFloor(scene: Scene) {
+function createFloor(scene: Scene): Mesh {
     const ground = GroundBuilder.CreateGround('floor', { width: 15, height: 10 }, scene)
     const mat = new StandardMaterial('groundMat', scene)
     const texture = new Texture('./textures/floor.jpg', scene)
@@ -131,8 +162,11 @@ function createDealer(scene: Scene): Mesh {
     panel.material = material
     return panel
 }
-
-function createTable(scene: Scene) {
+function createChips(scene: Scene): Mesh {
+    const cylinder = MeshBuilder.CreateCylinder('chips', { height: 0.01, diameterTop: 0.03, diameterBottom: 0.03 })
+    return cylinder
+}
+function createTable(scene: Scene): Mesh {
     const disc = BABYLON.MeshBuilder.CreateDisc("disc", { radius: 1.2, tessellation: 64 });
     const borderTable = BABYLON.MeshBuilder.CreateTorus('tableBorder', { diameter: 2.5, tessellation: 64, thickness: 0.1 })
     disc.rotation.x = Math.PI / 2
@@ -143,7 +177,14 @@ function createTable(scene: Scene) {
     borderTable.rotation.x = Math.PI / 2
     return disc;
 }
-function createControls(scene: Scene) {
+interface ControlsBtn {
+    hitBtn: Mesh;
+    doubleBtn: Mesh;
+    splitBtn: Mesh;
+    standBtn: Mesh;
+}
+
+function createControls(scene: Scene): ControlsBtn {
     const hitBtn = createHitButton(scene)
     const doubleBtn = createDoubleButton(scene)
     doubleBtn.parent = hitBtn
@@ -160,7 +201,7 @@ function createControls(scene: Scene) {
     function createHitButton(scene: Scene) {
         const plane = BABYLON.MeshBuilder.CreatePlane('hitBtn', { width: 0.05, height: 0.05 })
         const material = new StandardMaterial('hitMat', scene)
-        material.diffuseColor = Color3.Green()
+        material.diffuseColor = Color3.Teal()
         plane.material = material
         plane.actionManager = new ActionManager(scene)
         plane.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, () => {
@@ -204,59 +245,6 @@ function createControls(scene: Scene) {
 }
 
 function CreateDeck(): Mesh {
-    const box = MeshBuilder.CreateBox('deck', { size: 0.35 })
+    const box = MeshBuilder.CreateBox('deck', { width: 0.1, height: 0.15, depth: 0.1 })
     return box
 }
-
-function moveCardX() {
-    const animation = new BABYLON.Animation(
-        "anim",
-        "position.z",
-        30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-    const keyFrames = [];
-    keyFrames.push({
-        frame: 0,
-        value: 0
-    })
-    keyFrames.push({
-        frame: 15,
-        value: 2
-    })
-    keyFrames.push({
-        frame: 30,
-        value: 0
-    })
-    animation.setKeys(keyFrames)
-    return animation
-}
-function rotateCardY() {
-    const animation = new BABYLON.Animation(
-        "anim",
-        "rotation.y",
-        30, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-    const keyFrames = [];
-    keyFrames.push({
-        frame: 0,
-        value: 0
-    })
-    keyFrames.push({
-        frame: 60,
-        value: Math.PI * 2
-    })
-    animation.setKeys(keyFrames)
-    return animation
-}
-
-
-
-// const createCard = (scene: Scene) => {
-//     const card = MeshBuilder.CreateBox('plane', { width: 1, height: 1 })
-//     const mat = new StandardMaterial('cardMat', scene)
-//     card.scaling._y = 0.1
-//     mat.diffuseColor = Color3.Blue();
-//     mat.emissiveColor = Color3.Blue();
-//     card.material = mat;
-//     card.position = new Vector3(0, 0.1, 0)
-//     // card.rotation.x = Math.PI / 2
-//     return card
-// }
