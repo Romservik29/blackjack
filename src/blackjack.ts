@@ -77,8 +77,9 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
                         const place = places3d[idx]
                         place.hands.push({ cards })
                         const animCards: Array<{ mesh: Mesh, position: Vector3 }> = []
-                        cards.forEach((card) => {
-                            animCards.push({ mesh: card.cardMesh, position: place.place.getAbsolutePosition() })
+                        cards.forEach((card, idx) => {
+                            const { x, y, z } = place.place.getAbsolutePosition()
+                            animCards.push({ mesh: card.cardMesh, position: new Vector3(x - (idx * 0.03), y-(idx*0.001), z - (idx * 0.03)) })
                         })
                         console.log(toJS(game))
                         console.log(places3d)
