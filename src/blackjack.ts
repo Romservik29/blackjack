@@ -168,9 +168,12 @@ function CreatePlace(playerId: string, placeId: number, tablePlace: TablePlace, 
         if (tablePlace.playerID) {
             const { player } = game
             if (player.chipInHand) {
-                game.addChipsToBet(playerId,placeId)
+                game.addChipsToBet(playerId, placeId)
+                const chip = createChip()
+                const position = place.getAbsolutePosition()
+                chip.position = new Vector3(position.x, position.y, position.z)
+                //TODO: animation falling chip
             }
-            //TODO: CreateChip and move on place
         }
     }))
     //--------------//
@@ -223,6 +226,10 @@ function createDealer(scene: Scene): Mesh {
     material.diffuseTexture = new Texture('./textures/dealer.png', scene)
     panel.material = material
     return panel
+}
+function createChip(): Mesh {
+    const cylinder = MeshBuilder.CreateCylinder('chip', { height: 0.01, diameterTop: 0.03, diameterBottom: 0.03 })
+    return cylinder
 }
 function createChips(value: number, hl: HighlightLayer, hlchipInHand: HighlightLayer, takeChip: (value: number) => void, scene: Scene): Mesh {
     const cylinder = MeshBuilder.CreateCylinder('chips', { height: 0.01, diameterTop: 0.03, diameterBottom: 0.03 })
