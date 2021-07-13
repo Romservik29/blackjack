@@ -16,7 +16,7 @@ export class TablePlace {
     setPlayer(playerId: string) {
         this.playerID = playerId
     }
-    betChips(chips: number) {
+    addChipsToBet(chips: number) {
         this.bet += chips
     }
     clearBet() {

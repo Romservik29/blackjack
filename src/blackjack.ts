@@ -49,7 +49,7 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
     const places: any = []
     for (let i = 0; i < 3; i++) {
         const tablePlace = game.addPlace(i)
-        const place = CreatePlace(game.player.id, tablePlace, scene)
+        const place = CreatePlace(game.player.id, i, tablePlace, scene)
         place.position = new Vector3((firstPlacePos.x - i * 0.65), firstPlacePos.y, firstPlacePos.z)
     }
     // const place1 = CreatePlace(scene, table, game.player.id)
@@ -88,11 +88,6 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
     //     cards.push({ mesh: card2, position: position2 })
     // })
 
-
-    setTimeout(() => {
-        game.addPlace(0)
-        game.places[0].betChips(100)
-    }, 1000)
     reaction(
         () => game.hasBet(),
         hasBet => {
@@ -162,12 +157,23 @@ async function createAnimationCard(card: Mesh, position: Vector3, scene: Scene) 
     await anim.waitAsync()
 }
 
-function CreatePlace(playerId: string, tablePlace: TablePlace, scene: Scene) {
+function CreatePlace(playerId: string, placeId: number, tablePlace: TablePlace, scene: Scene) {
     const place = MeshBuilder.CreateDisc('place', { radius: 0.1, tessellation: 64 })
     let mat = new StandardMaterial('placeMat', scene)
     mat.diffuseColor = Color3.Yellow()
     place.rotation.x = Math.PI / 2
     place.material = mat
+    place.actionManager = new ActionManager(scene)
+    place.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
+        if (tablePlace.playerID) {
+            const { player } = game
+            if (player.chipInHand) {
+                game.addChipsToBet(playerId,placeId)
+            }
+            //TODO: CreateChip and move on place
+        }
+    }))
+    //--------------//
     const planeWidth = 0.3;
     const planeHeight = 0.07;
     const namePlane = BABYLON.MeshBuilder.CreatePlane('place', { width: planeWidth, height: planeHeight })
@@ -225,7 +231,6 @@ function createChips(value: number, hl: HighlightLayer, hlchipInHand: HighlightL
         takeChip(value)
         hlchipInHand.removeAllMeshes()
         hlchipInHand.addMesh(cylinder, Color3.Blue())
-        console.log(game.player)
     }))
     cylinder.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPointerOverTrigger, () => {
         hl.addMesh(cylinder, Color3.Red())

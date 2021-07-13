@@ -48,11 +48,17 @@ export class Game {
         const place = this.getPlace(placeId)
         place.setPlayer(playerId)
     }
-    addChipsToBet(playerId: string, placeId: number, chips: number) {
+    addChipsToBet(playerId: string, placeId: number) {
         const player = this.players.find((player) => player.id === playerId)
         const place = this.places.find((place) => place.id === placeId)
-        player?.minusChips(chips)
-        place?.betChips(chips)
+        if (player && this.player.chipInHand) {
+            player.minusChips(this.player.chipInHand!)
+            place?.addChipsToBet(this.player.chipInHand!)
+        } else if (!player) {
+            throw new Error("not found player")
+        } else {
+            throw new Error("haven't chips in hand")
+        }
     }
     clearBet(placeId: number) {
         const place = this.places.find((place) => place.id === placeId)
@@ -70,7 +76,9 @@ export class Game {
         const place = this.places.find((place) => place.id === placeId)
         if (place) {
             place.hands[handIdx].hit(this.deck.takeCard())
-            this.addChipsToBet(playerId, placeId, place.bet)
+            this.player.minusChips(place.bet)
+            place.bet *= 2
+            // addChipsToBet(playerId, placeId, place.bet)
         }
     }
     split(placeId: number, handIdx: number) {

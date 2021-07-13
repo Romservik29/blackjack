@@ -7,7 +7,8 @@ describe("game cycle", () => {
         game.addPlace(0)
         game.setPlace(game.player.id, 0)
         const setedPlace = game.places.find((place) => place.playerID === game.player.id)
-        setedPlace?.betChips(100)
+        game.player.chipInHand = 100;
+        setedPlace?.addChipsToBet(100)
         game.deal()
         it('dealler have 2 cards', () => {
             expect(game.dealer.hand.cards.length).toBe(2)
@@ -28,7 +29,8 @@ describe("game cycle", () => {
             game.addPlace(0)
             game.setPlace(game.player.id, 0)
             const setedPlace = game.places.find((place) => place.playerID === game.player.id)
-            game.addChipsToBet(game.player.id, 0, 100)
+            game.player.chipInHand = 100;
+            game.addChipsToBet(game.player.id, 0)
             const playerHand = new PlayerHand(setedPlace?.id!)
             setedPlace?.hands.push(playerHand)
             playerHand.cards = [new Card("Club", "10"), new Card("Diamond", "10")]
@@ -43,7 +45,8 @@ describe("game cycle", () => {
             game.addPlace(0)
             game.setPlace(game.player.id, 0)
             const setedPlace = game.places.find((place) => place.playerID === game.player.id)
-            game.addChipsToBet(game.player.id, 0, 100)
+            game.player.chipInHand = 100;
+            game.addChipsToBet(game.player.id, 0)
             const playerHand = new PlayerHand(setedPlace?.id!)
             setedPlace?.hands.push(playerHand)
             playerHand.cards = [new Card("Club", "10"), new Card("Diamond", "5")]
@@ -58,7 +61,8 @@ describe("game cycle", () => {
             game.addPlace(0)
             game.setPlace(game.player.id, 0)
             const setedPlace = game.places.find((place) => place.playerID === game.player.id)
-            game.addChipsToBet(game.player.id, 0, 100)
+            game.player.chipInHand = 100;
+            game.addChipsToBet(game.player.id, 0)
             const playerHand = new PlayerHand(setedPlace?.id!)
             setedPlace?.hands.push(playerHand)
             playerHand.cards = [new Card("Club", "10"), new Card("Diamond", "10")]
