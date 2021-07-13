@@ -13,8 +13,8 @@ export class TablePlace {
         this.bet = 0
         makeAutoObservable(this)
     }
-    setPlayer(id: string) {
-        this.playerID = id
+    setPlayer(playerId: string) {
+        this.playerID = playerId
     }
     betChips(chips: number) {
         this.bet += chips

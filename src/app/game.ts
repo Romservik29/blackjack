@@ -77,8 +77,10 @@ export class Game {
         const place = this.places.find((place) => place.id === placeId)
         place?.hands.push(place?.hands[handIdx].split())
     }
-    addPlace(id: number): void {
-        this.places.push(new TablePlace(id))
+    addPlace(id: number): TablePlace {
+        const place = new TablePlace(id)
+        this.places.push(place)
+        return place
     }
     addPlayer(id: string, chips: number): void {
         this.players.push(new Player(id, chips))

@@ -16,11 +16,14 @@ import {
     UniversalCamera,
     ExecuteCodeAction,
     ActionManager,
+    HighlightLayer,
 } from "@babylonjs/core";
 import * as BABYLON from '@babylonjs/core'
 import { autorun, reaction } from 'mobx';
 import { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import { Card } from './app/Card';
+import { table } from 'console';
+import { cloneElement } from 'react';
 
 
 const game = new Game("Hero", "1234", 5000)
@@ -28,9 +31,10 @@ const game = new Game("Hero", "1234", 5000)
 export const createRoom = (canvas: HTMLCanvasElement) => {
     const engine = new Engine(canvas)
     const scene = new Scene(engine)
-    const camera = new UniversalCamera
-        ('camera1', new Vector3(0, 2.5, 2), scene)
-    // const camera = new ArcRotateCamera('camera', Math.PI/6, Math.PI, 1.5, new Vector3(0, 2.5, 1.7), scene)
+    const camera = new UniversalCamera('camera1', new Vector3(0, 2.5, 2), scene)
+    const hlChips = new BABYLON.HighlightLayer("hl-chips", scene);
+    const hlChipInHand = new BABYLON.HighlightLayer("hl-chip-in-hand", scene);
+    // const camera = new ArcRotateCamera('camera', Math.PI / 6, Math.PI, 1.5, new Vector3(0, 2.5, 1.7), scene)
     // camera.upperBetaLimit = Math.PI / 2.2;
     camera.attachControl(true)
     const light = new HemisphericLight('HemiLght', new Vector3(0, 100, 0), scene)
@@ -41,38 +45,48 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
     table.position = new Vector3(0, 0.7, 0)
     const dealer = createDealer(scene)
     //-------------------Places---------------------------------//
-    const place1 = CreatePlace(scene, table, game.player.id)
-    place1.position = new Vector3((-0.5), 0.65, (-0.001))
-    const place2 = CreatePlace(scene, table, game.player.id)
-    place2.position = new Vector3(0, 0.65, (-0.001))
-    const place3 = CreatePlace(scene, table, game.player.id)
-    place3.position = new Vector3(0.5, 0.65, (-0.001))
-    const places = [place1, place2, place3]
+    const firstPlacePos = new Vector3((0.65), table.position.y + 0.001, 0.5)
+    const places: any = []
+    for (let i = 0; i < 3; i++) {
+        const tablePlace = game.addPlace(i)
+        const place = CreatePlace(game.player.id, tablePlace, scene)
+        place.position = new Vector3((firstPlacePos.x - i * 0.65), firstPlacePos.y, firstPlacePos.z)
+    }
+    // const place1 = CreatePlace(scene, table, game.player.id)
+    // place1.position = new Vector3((-0.5), 0.65, (-0.001))
+    // const place2 = CreatePlace(scene, table, game.player.id)
+    // place2.position = new Vector3(0, 0.65, (-0.001))
+    // const place3 = CreatePlace(scene, table, game.player.id)
+    // place3.position = new Vector3(0.5, 0.65, (-0.001))
+    // const places = [place1, place2, place3]
     //-------------------Deck--------------------------------//
     // const deck = CreateDeck()
     // deck.parent = table
     // deck.position = new Vector3((-0.65), 0, (-0.5))
     //
-    camera.setTarget(dealer.position)
-    const chip = createChips(scene)
+    camera.setTarget(table.position)
+    const chip = createChips(100, hlChips, hlChipInHand, game.player.setChipInHand.bind(game), scene)
     chip.parent = table
     chip.rotation.x = Math.PI / 2
-    chip.position.z = -0.5
-    const cards: Array<{ mesh: Mesh, position: Vector3 }> = []
-    places.forEach((place) => {
-        const card = createCard()
-        card.parent = table
-        card.rotation.x = Math.PI / 2
-        const card2 = createCard()
-        card2.parent = table
-        card2.rotation.x = Math.PI / 2
-        const placeAbsPos = place.getAbsolutePosition()
-        const position2 = new Vector3(placeAbsPos.x, placeAbsPos.y, placeAbsPos.z)
-        position2.x -= 0.05
-        position2.y -= 0.05
-        cards.push({ mesh: card, position: place.position })
-        cards.push({ mesh: card2, position: position2 })
-    })
+    const chip1 = createChips(200, hlChips, hlChipInHand, game.player.setChipInHand.bind(game), scene)
+    chip1.parent = table
+    chip1.rotation.x = Math.PI / 2
+    chip1.position.x = 0.5
+    // const cards: Array<{ mesh: Mesh, position: Vector3 }> = []
+    // places.forEach((place) => {
+    //     const card = createCard()
+    //     card.parent = table
+    //     card.rotation.x = Math.PI / 2
+    //     const card2 = createCard()
+    //     card2.parent = table
+    //     card2.rotation.x = Math.PI / 2
+    //     const placeAbsPos = place.getAbsolutePosition()
+    //     const position2 = new Vector3(placeAbsPos.x, placeAbsPos.y, placeAbsPos.z)
+    //     position2.x -= 0.05
+    //     position2.y -= 0.05
+    //     cards.push({ mesh: card, position: place.position })
+    //     cards.push({ mesh: card2, position: position2 })
+    // })
 
 
     setTimeout(() => {
@@ -98,7 +112,7 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
                     break;
                 }
                 case GameStatus.DEALING: {
-                    console.log(GameStatus.DEALING)
+
                     break;
                 }
                 case GameStatus.PLAYING_PLAYERS: {
@@ -148,11 +162,11 @@ async function createAnimationCard(card: Mesh, position: Vector3, scene: Scene) 
     await anim.waitAsync()
 }
 
-function CreatePlace(scene: Scene, parentMesh: Mesh, playerName: string) {
+function CreatePlace(playerId: string, tablePlace: TablePlace, scene: Scene) {
     const place = MeshBuilder.CreateDisc('place', { radius: 0.1, tessellation: 64 })
-    place.parent = parentMesh
     let mat = new StandardMaterial('placeMat', scene)
     mat.diffuseColor = Color3.Yellow()
+    place.rotation.x = Math.PI / 2
     place.material = mat
     const planeWidth = 0.3;
     const planeHeight = 0.07;
@@ -173,12 +187,12 @@ function CreatePlace(scene: Scene, parentMesh: Mesh, playerName: string) {
     namePlane.actionManager = new ActionManager(scene)
     namePlane.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
         textureName.clear()
-        textureName.drawText(playerName, null, null, font, "black", "white", true)
-        const constrols = createControls(scene)
-        const btns = createControls(scene)
-        btns.hitBtn.parent = namePlane
-        btns.hitBtn.position.y = -0.1
-
+        tablePlace.setPlayer(playerId)
+        textureName.drawText(tablePlace.playerID ?? "unknow", null, null, font, "black", "white", true)
+        // const constrols = createControls(scene)
+        // const btns = createControls(scene)
+        // btns.hitBtn.parent = namePlane
+        // btns.hitBtn.position.y = -0.1
     }))
     return place
 }
@@ -204,8 +218,21 @@ function createDealer(scene: Scene): Mesh {
     panel.material = material
     return panel
 }
-function createChips(scene: Scene): Mesh {
+function createChips(value: number, hl: HighlightLayer, hlchipInHand: HighlightLayer, takeChip: (value: number) => void, scene: Scene): Mesh {
     const cylinder = MeshBuilder.CreateCylinder('chips', { height: 0.01, diameterTop: 0.03, diameterBottom: 0.03 })
+    cylinder.actionManager = new ActionManager(scene)
+    cylinder.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnLeftPickTrigger, () => {
+        takeChip(value)
+        hlchipInHand.removeAllMeshes()
+        hlchipInHand.addMesh(cylinder, Color3.Blue())
+        console.log(game.player)
+    }))
+    cylinder.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPointerOverTrigger, () => {
+        hl.addMesh(cylinder, Color3.Red())
+    }))
+    cylinder.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPointerOutTrigger, () => {
+        hl.removeMesh(cylinder)
+    }))
     return cylinder
 }
 function createTable(scene: Scene): Mesh {
