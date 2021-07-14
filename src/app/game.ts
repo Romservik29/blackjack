@@ -75,7 +75,7 @@ export class Game {
         const place = this.places.find((place) => place.id === placeId)
         place?.hands[handIdx].hit(this.deck.takeCard())
     }
-    double(placeId: number, playerId: string, handIdx: number) {
+    double(placeId: number, handIdx: number) {
         const place = this.places.find((place) => place.id === placeId)
         if (place) {
             place.hands[handIdx].hit(this.deck.takeCard())
@@ -87,6 +87,15 @@ export class Game {
     split(placeId: number, handIdx: number) {
         const place = this.places.find((place) => place.id === placeId)
         place?.hands.push(place?.hands[handIdx].split())
+    }
+    stand(placeId: number, handIdx: number) {
+        alert("gameStand")
+        const place = this.places.find((place) => place.id === placeId)
+        if (place) {
+            place?.hands[handIdx].stand()
+        } else {
+            throw new Error("place not found")
+        }
     }
     addPlace(id: number): TablePlace {
         const place = new TablePlace(id)

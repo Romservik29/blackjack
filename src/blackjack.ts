@@ -93,7 +93,7 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
                 }
             }
             await dealCard(animStak, scene)
-            places3d.forEach((place) => {
+            places3d.forEach((place, idx) => {
                 if (place.hands[0]) {
                     const card = place.hands[0].cards[0].cardMesh
                     // const some = MeshBuilder.CreatePlane('box', {size: 0.05})
@@ -102,7 +102,7 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
                     // some.rotation.x = Math.PI
                     // some.position = new Vector3(card.position.x,card.position.y+0.5,card.position.z)
                     createHandScore(place.place, scene, camera)
-                    const { hitBtn } = createControls(scene)
+                    const { hitBtn } = createControls(idx, 0, scene)
                     hitBtn.parent = place.place
                     hitBtn.position.x += 0.1
                     hitBtn.position.y += 0.1
@@ -214,8 +214,6 @@ function createHandScore(place: Mesh, scene: Scene, camera: ArcRotateCamera) {
     const DTHeight = size * 60;
 
     //Set text
-    var text = "12";
-
     //Create dynamic texture
     var dynamicTexture = new DynamicTexture("texture", { width: DTWidth, height: DTHeight }, scene, true);
 
@@ -336,61 +334,61 @@ interface ControlsBtn {
     standBtn: Mesh;
 }
 
-function createControls(scene: Scene): ControlsBtn {
-    const hitBtn = createHitButton(scene)
-    const doubleBtn = createDoubleButton(scene)
+function createControls(placeIdx: number, handIdx: number,scene: Scene): ControlsBtn {
+    const hitBtn = createHitButton(placeIdx, handIdx, scene)
+    const doubleBtn = createDoubleButton(placeIdx, handIdx, scene)
     doubleBtn.parent = hitBtn
     doubleBtn.position.x = 0.05
-    const splitBtn = createSplitButton(scene)
+    const splitBtn = createSplitButton(placeIdx, handIdx, scene)
     splitBtn.parent = doubleBtn
     splitBtn.position.x = 0.05
-    const standBtn = createStandButton(scene)
+    const standBtn = createStandButton(placeIdx, handIdx, scene)
     standBtn.parent = splitBtn
     standBtn.position.x = 0.05
 
     return { hitBtn, doubleBtn, splitBtn, standBtn }
 
-    function createHitButton(scene: Scene) {
+    function createHitButton(placeIdx: number, handIdx: number,scene: Scene) {
         const plane = BABYLON.MeshBuilder.CreatePlane('hitBtn', { width: 0.05, height: 0.05 })
         const material = new StandardMaterial('hitMat', scene)
         material.diffuseColor = Color3.Teal()
         plane.material = material
         plane.actionManager = new ActionManager(scene)
         plane.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, () => {
-            alert("hit")
+            game.hit(placeIdx,handIdx)
         }))
         return plane
     }
-    function createDoubleButton(scene: Scene) {
+    function createDoubleButton(placeIdx: number, handIdx: number, scene: Scene) {
         const plane = MeshBuilder.CreatePlane('hitBtn', { width: 0.05, height: 0.05 })
         const material = new StandardMaterial('doubleMat', scene)
         material.diffuseColor = Color3.Yellow()
         plane.material = material
         plane.actionManager = new ActionManager(scene)
         plane.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
-            alert("double")
+            game.double(placeIdx,handIdx)
         }))
         return plane
     }
-    function createSplitButton(scene: Scene) {
+    function createSplitButton(placeIdx: number, handIdx: number,scene: Scene) {
         const plane = MeshBuilder.CreatePlane('hitBtn', { width: 0.05, height: 0.05 })
         const material = new StandardMaterial('hitMat', scene)
         material.diffuseColor = Color3.Blue()
         plane.material = material
         plane.actionManager = new ActionManager(scene)
         plane.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
-            alert("split")
+            game.split(placeIdx,handIdx)
         }))
         return plane
     }
-    function createStandButton(scene: Scene) {
+    function createStandButton(placeIdx: number, handIdx: number, scene: Scene) {
         const plane = BABYLON.MeshBuilder.CreatePlane('hitBtn', { width: 0.05, height: 0.05 })
         const material = new StandardMaterial('material', scene)
         material.diffuseColor = Color3.Red()
         plane.material = material
         plane.actionManager = new ActionManager(scene)
         plane.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
-            alert("stand")
+            game.stand(placeIdx, handIdx)
         }))
         return plane
     }
