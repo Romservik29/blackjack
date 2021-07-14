@@ -289,9 +289,10 @@ function createFloor(scene: Scene): Mesh {
     return ground
 }
 function createDealer(scene: Scene): Mesh {
-    const panel = MeshBuilder.CreatePlane('dealerPlane', { height: 1.2, width: 1.2, sideOrientation: 1 })
+    const panel = MeshBuilder.CreatePlane('dealerPlane', { height: 1, width: 1, sideOrientation: 1 })
     panel.position = new Vector3(0, 1, -1.5);
     const material = new StandardMaterial('dealerMat', scene)
+    material.opacityTexture = new Texture('./textures/dealer.png', scene)
     material.diffuseTexture = new Texture('./textures/dealer.png', scene)
     panel.material = material
     return panel
@@ -334,7 +335,7 @@ interface ControlsBtn {
     standBtn: Mesh;
 }
 
-function createControls(placeIdx: number, handIdx: number,scene: Scene): ControlsBtn {
+function createControls(placeIdx: number, handIdx: number, scene: Scene): ControlsBtn {
     const hitBtn = createHitButton(placeIdx, handIdx, scene)
     const doubleBtn = createDoubleButton(placeIdx, handIdx, scene)
     doubleBtn.parent = hitBtn
@@ -348,14 +349,14 @@ function createControls(placeIdx: number, handIdx: number,scene: Scene): Control
 
     return { hitBtn, doubleBtn, splitBtn, standBtn }
 
-    function createHitButton(placeIdx: number, handIdx: number,scene: Scene) {
+    function createHitButton(placeIdx: number, handIdx: number, scene: Scene) {
         const plane = BABYLON.MeshBuilder.CreatePlane('hitBtn', { width: 0.05, height: 0.05 })
         const material = new StandardMaterial('hitMat', scene)
         material.diffuseColor = Color3.Teal()
         plane.material = material
         plane.actionManager = new ActionManager(scene)
         plane.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, () => {
-            game.hit(placeIdx,handIdx)
+            game.hit(placeIdx, handIdx)
         }))
         return plane
     }
@@ -366,18 +367,18 @@ function createControls(placeIdx: number, handIdx: number,scene: Scene): Control
         plane.material = material
         plane.actionManager = new ActionManager(scene)
         plane.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
-            game.double(placeIdx,handIdx)
+            game.double(placeIdx, handIdx)
         }))
         return plane
     }
-    function createSplitButton(placeIdx: number, handIdx: number,scene: Scene) {
+    function createSplitButton(placeIdx: number, handIdx: number, scene: Scene) {
         const plane = MeshBuilder.CreatePlane('hitBtn', { width: 0.05, height: 0.05 })
         const material = new StandardMaterial('hitMat', scene)
         material.diffuseColor = Color3.Blue()
         plane.material = material
         plane.actionManager = new ActionManager(scene)
         plane.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
-            game.split(placeIdx,handIdx)
+            game.split(placeIdx, handIdx)
         }))
         return plane
     }
