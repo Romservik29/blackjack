@@ -1,6 +1,6 @@
 import { PlayerHand } from './PlayerHand';
 import { TablePlace } from './TablePlace';
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, observable, observe } from 'mobx';
 import { Dealer } from './Dealer';
 import { Deck } from './Deck';
 import { Player } from './Player';
@@ -27,6 +27,9 @@ export class Game {
         this.deck = deck
         this.status = GameStatus.WAITING_BETS
         makeAutoObservable(this)
+    }
+    getStatus = (): GameStatus => {
+        return this.status
     }
     setTimer(time: number) {
         this.timer = time
