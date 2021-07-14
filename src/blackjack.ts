@@ -29,10 +29,10 @@ const game = new Game("Hero", "1234", 5000)
 export const createRoom = (canvas: HTMLCanvasElement) => {
     const engine = new Engine(canvas)
     const scene = new Scene(engine)
-    // const camera = new UniversalCamera('camera1', new Vector3(0, 2.5, 2), scene)
+    const camera = new UniversalCamera('camera1', new Vector3(0, 2.5, 2), scene)
     const hlChips = new BABYLON.HighlightLayer("hl-chips", scene);
     const hlChipInHand = new BABYLON.HighlightLayer("hl-chip-in-hand", scene);
-    const camera = new ArcRotateCamera('camera', Math.PI / 6, Math.PI, 1.5, new Vector3(0, 2.5, 1.7), scene)
+    // const camera = new ArcRotateCamera('camera', Math.PI / 6, Math.PI, 1.5, new Vector3(0, 2.5, 1.7), scene)
     // camera.upperBetaLimit = Math.PI / 2.2;
     camera.attachControl(true)
     const light = new HemisphericLight('HemiLght', new Vector3(0, 100, 0), scene)
@@ -41,6 +41,7 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
     const floor = createFloor(scene)
     const table = createTable(scene)
     table.position = new Vector3(0, 0.7, 0)
+    const deckPosition = new Vector3(0, 0.71, 0)
     const dealer = createDealer(scene)
     //-------------------Places---------------------------------//
     const firstPlacePos = new Vector3((0.65), table.position.y + 0.001, 0.5)
@@ -62,56 +63,51 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
         place.position = new Vector3((firstPlacePos.x - i * 0.65), firstPlacePos.y, firstPlacePos.z)
         places3d.push({ place: place, hands: [] })
     }
-    autorun(
-        async () => {
-            const hand3d: { mesh: Mesh, position: Vector3 }[][] = []
-            game.places.forEach((place, idx) => {
-                place.hands.forEach((hand, handIdx) => {
-                    if (!places3d[idx].hands[handIdx]) {
-                        const cards: Card3d[] = []
-                        hand.cards.forEach((card) => {
-                            const card3d: Card3d = { cardMesh: createCard(), card }
-                            card3d.cardMesh.position = new Vector3(0, 0.71, 0)
-                            cards.push(card3d)
-                        })
-                        const place = places3d[idx]
-                        place.hands.push({ cards })
-                        const animCards: Array<{ mesh: Mesh, position: Vector3 }> = []
-                        cards.forEach((card, idx) => {
-                            const { x, y, z } = place.place.getAbsolutePosition()
-                            animCards.push({ mesh: card.cardMesh, position: new Vector3(x - (idx * 0.03), y + (idx * 0.001), z - (idx * 0.06)) })
-                        })
-                        hand3d.push(animCards)
-                    }
-                })
+    const animCardStak: Array<{ mesh: Mesh, position: Vector3 }> = []
 
-            })
-            const animStak: Array<{ mesh: Mesh, position: Vector3 }> = []
-            for (let i = 0; i < 2; i++) {
-                for (let j = 0; j < hand3d.length; j++) {
-                    animStak.push(hand3d[j][i])
-                }
-            }
-            await dealCard(animStak, scene)
-            places3d.forEach((place, idx) => {
-                if (place.hands[0]) {
-                    const card = place.hands[0].cards[0].cardMesh
-                    // const some = MeshBuilder.CreatePlane('box', {size: 0.05})
-                    // some.parent = card
-                    // some.position.y +=0.25
-                    // some.rotation.x = Math.PI
-                    // some.position = new Vector3(card.position.x,card.position.y+0.5,card.position.z)
-                    createHandScore(place.place, scene, camera)
-                    const { hitBtn } = createControls(idx, 0, scene)
-                    hitBtn.parent = place.place
-                    hitBtn.position.x += 0.1
-                    hitBtn.position.y += 0.1
-                    hitBtn.position.z -= 0.05
-                    hitBtn.rotation.x = Math.PI / 4
-                }
-            })
-
-        })
+    // autorun(//give cards all players who did bet
+    //     async () => {
+    //         const hand3d: { mesh: Mesh, position: Vector3 }[][] = []
+    //         game.places.forEach((place, idx) => {
+    //             place.hands.forEach((hand, handIdx) => {
+    //                 if (!places3d[idx].hands[handIdx]) {
+    //                     const cards: Card3d[] = []
+    //                     hand.cards.forEach((card) => {
+    //                         const card3d: Card3d = { cardMesh: createCard(), card }
+    //                         card3d.cardMesh.position = deckPosition
+    //                         cards.push(card3d)
+    //                     })
+    //                     const place3d = places3d[idx]
+    //                     place3d.hands.push({ cards })
+    //                     const animCards: Array<{ mesh: Mesh, position: Vector3 }> = []
+    //                     cards.forEach((card, idx) => {
+    //                         const { x, y, z } = place3d.place.getAbsolutePosition()
+    //                         animCards.push({ mesh: card.cardMesh, position: new Vector3(x - (idx * 0.03), y + (idx * 0.001), z - (idx * 0.06)) })
+    //                     })
+    //                     hand3d.push(animCards)
+    //                 }
+    //             })
+    //         })
+    //         for (let i = 0; i < 2; i++) {
+    //             for (let j = 0; j < hand3d.length; j++) {
+    //                 animCardStak.push(hand3d[j][i])
+    //             }
+    //         }
+    //         await dealCard(animCardStak, scene)
+    //         places3d.forEach((place, idx) => {
+    //             if (place.hands[0]) {
+    //                 const card = place.hands[0].cards[0].cardMesh
+    //                 createHandScore(place.place, scene, camera)
+    //                 const { hitBtn } = createControls(idx, 0, scene)
+    //                 hitBtn.parent = place.place
+    //                 hitBtn.position.x += 0.1
+    //                 hitBtn.position.y += 0.1
+    //                 hitBtn.position.z -= 0.05
+    //                 hitBtn.rotation.x = Math.PI / 4
+    //             }
+    //         })
+    //     }
+    // )
 
     // const deck = CreateDeck()
     // deck.parent = table
@@ -125,14 +121,17 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
     chip1.parent = table
     chip1.rotation.x = Math.PI / 2
     chip1.position.x = 0.5
-
-    reaction(
+    const stop = reaction(
         () => game.hasBet(),
         hasBet => {
+            console.log("react")
             if (hasBet) {
                 const timer = setTimeout(() => {
-                    game.status = GameStatus.DEALING
+                    console.log("timer")
+                    game.setStatus(GameStatus.DEALING)
+                    stop()
                 }, 2000)
+
             }
         }
     )
@@ -141,21 +140,53 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
         status => {
             switch (status) {
                 case GameStatus.WAITING_BETS: {
-                    console.log(GameStatus.WAITING_BETS)
                     break;
                 }
                 case GameStatus.DEALING: {
-                    game.deal()
-                    // const card = createCard()
-                    // card.position = new Vector3(0, 0.71, 0)
-                    // const q = { mesh: card, position: places[1].position }
-                    // const {x,y,z} =  places[1].getAbsolutePosition()
-                    // setTimeout(() => createAnimationCard(q.mesh, new Vector3(x,y,z), scene), 1000)
+                    deal()
                     break;
                 }
                 case GameStatus.PLAYING_PLAYERS: {
-                    console.log(GameStatus.PLAYING_PLAYERS)
-                    break;
+                    const playing = autorun(
+                        () => {
+                            game.places.forEach((place, placeIdx) => {
+                                place.hands.forEach((hand, handIdx) => {
+                                    const hand3d = places3d[placeIdx].hands[handIdx]
+                                    if (hand.cards.length !== hand3d.cards.length) {
+                                        hand.cards.forEach((card, cardIdx) => {
+                                            console.log(card)
+                                            if (hand3d.cards[cardIdx] === undefined) {
+                                                console.log(hand3d.cards[cardIdx])
+                                                const card3d: Card3d = { cardMesh: createCard(), card }
+                                                card3d.cardMesh.position = deckPosition
+                                                const place3d = places3d[placeIdx]
+                                                place3d.hands[handIdx].cards.push(card3d)
+                                                const { x, y, z } = place3d.place.getAbsolutePosition()
+                                                const animcard = {
+                                                    mesh: card3d.cardMesh,
+                                                    position: new Vector3(
+                                                        x - (cardIdx * 0.03),
+                                                        y + (cardIdx * 0.001),
+                                                        z - (cardIdx * 0.06)
+                                                    )
+                                                }
+                                                createAnimationCard(animcard.mesh, animcard.position, scene)
+                                            }
+                                        })
+                                    }
+                                })
+                            })
+                        })
+                    reaction(
+                        () => game.isAllStand,
+                        isAllStand => {
+                            if (isAllStand) {
+                                playing()
+                                game.setStatus(GameStatus.PLAYING_DEALER)
+                            }
+                        }
+                    )
+                    break
                 }
                 case GameStatus.PLAYING_DEALER: {
                     console.log(GameStatus.PLAYING_DEALER)
@@ -172,6 +203,54 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
     engine.runRenderLoop(() => {
         scene.render()
     })
+    const deal = async () => {
+        await game.deal()
+        const hand3d: { mesh: Mesh, position: Vector3 }[][] = []
+        game.places.forEach((place, idx) => {
+            place.hands.forEach((hand, handIdx) => {
+                if (!places3d[idx].hands[handIdx]) {
+                    const cards: Card3d[] = []
+                    hand.cards.forEach((card) => {
+                        const card3d: Card3d = { cardMesh: createCard(), card }
+                        card3d.cardMesh.position = deckPosition
+                        cards.push(card3d)
+                    })
+                    const place3d = places3d[idx]
+                    place3d.hands.push({ cards })
+                    const animCards: Array<{ mesh: Mesh, position: Vector3 }> = []
+                    cards.forEach((card, idx) => {
+                        const { x, y, z } = place3d.place.getAbsolutePosition()
+                        animCards.push({ mesh: card.cardMesh, position: new Vector3(x - (idx * 0.03), y + (idx * 0.001), z - (idx * 0.06)) })
+                    })
+                    hand3d.push(animCards)
+                }
+            })
+        })
+        for (let i = 0; i < 2; i++) {
+            for (let j = 0; j < hand3d.length; j++) {
+                animCardStak.push(hand3d[j][i])
+            }
+        }
+        game.dealer.hand.cards.forEach((card, idx) => {
+            const card3d: Card3d = { cardMesh: createCard(), card }
+            card3d.cardMesh.position = deckPosition
+            animCardStak.push({ mesh: card3d.cardMesh, position: new Vector3(0 - (idx * 0.03), 0.71 + (idx * 0.001), -0.5 - (idx * 0.06)) })
+        })
+        await dealCard(animCardStak, scene)
+        places3d.forEach((place, idx) => {
+            if (place.hands[0]) {
+                const card = place.hands[0].cards[0].cardMesh
+                createHandScore(place.place, scene)
+                const { hitBtn } = createControls(idx, 0, scene)
+                hitBtn.parent = place.place
+                hitBtn.position.x += 0.1
+                hitBtn.position.y += 0.1
+                hitBtn.position.z -= 0.05
+                hitBtn.rotation.x = Math.PI / 4
+            }
+        })
+        game.setStatus(GameStatus.PLAYING_PLAYERS)
+    }
 }
 async function dealCard(cards: Array<{ mesh: Mesh, position: Vector3 }>, scene: Scene,) {
     for (const card of cards) {
@@ -179,6 +258,7 @@ async function dealCard(cards: Array<{ mesh: Mesh, position: Vector3 }>, scene: 
     }
 }
 async function createAnimationCard(card: Mesh, position: Vector3, scene: Scene) {
+    console.log(card, position)
     const frameRate = 30
     const animation = new BABYLON.Animation("card-animation", "position", frameRate, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
     const keyFrames = [];
@@ -198,7 +278,7 @@ async function createAnimationCard(card: Mesh, position: Vector3, scene: Scene) 
     await anim.waitAsync()
 }
 
-function createHandScore(place: Mesh, scene: Scene, camera: ArcRotateCamera) {
+function createHandScore(place: Mesh, scene: Scene) {
     const size = 0.05;
     const plane = BABYLON.MeshBuilder.CreatePlane("plane23", { size }, scene);
     plane.parent = place
@@ -352,7 +432,7 @@ function createControls(placeIdx: number, handIdx: number, scene: Scene): Contro
     function createHitButton(placeIdx: number, handIdx: number, scene: Scene) {
         const plane = BABYLON.MeshBuilder.CreatePlane('hitBtn', { width: 0.05, height: 0.05 })
         const material = new StandardMaterial('hitMat', scene)
-        material.diffuseColor = Color3.Teal()
+        material.diffuseColor = Color3.Black()
         plane.material = material
         plane.actionManager = new ActionManager(scene)
         plane.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, () => {

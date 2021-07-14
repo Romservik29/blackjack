@@ -1,6 +1,6 @@
 import { PlayerHand } from './PlayerHand';
 import { TablePlace } from './TablePlace';
-import { makeAutoObservable, observable, observe } from 'mobx';
+import { action, makeAutoObservable, observable, observe } from 'mobx';
 import { Dealer } from './Dealer';
 import { Deck } from './Deck';
 import { Player } from './Player';
@@ -30,6 +30,12 @@ export class Game {
     }
     getStatus = (): GameStatus => {
         return this.status
+    }
+    get isAllStand(): boolean {
+        return !this.places.some((place) => place.hands.some((hand) => hand.isStand === false))
+    }
+    setStatus = (status: GameStatus): void => {
+        this.status = status
     }
     setTimer(time: number) {
         this.timer = time
