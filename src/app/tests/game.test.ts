@@ -35,7 +35,7 @@ describe("game cycle", () => {
             setedPlace?.hands.push(playerHand)
             playerHand.cards = [new Card("Club", "10"), new Card("Diamond", "10")]
             game.dealer.hand.cards = [new Card("Club", "10"), new Card("Diamond", "5")]
-            game.culcFinalResult()
+            game.calcFinalResult()
             it('player have 5100 chips', () => {
                 expect(game.player.chips).toBe(5100)
             })
@@ -51,7 +51,7 @@ describe("game cycle", () => {
             setedPlace?.hands.push(playerHand)
             playerHand.cards = [new Card("Club", "10"), new Card("Diamond", "5")]
             game.dealer.hand.cards = [new Card("Spade", "10"), new Card("Heart", "10")]
-            game.culcFinalResult()
+            game.calcFinalResult()
             it('player have 4900 chips', () => {
                 expect(game.player.chips).toBe(4900)
             })
@@ -67,7 +67,7 @@ describe("game cycle", () => {
             setedPlace?.hands.push(playerHand)
             playerHand.cards = [new Card("Club", "10"), new Card("Diamond", "10")]
             game.dealer.hand.cards = [new Card("Heart", "10"), new Card("Spade", "10")]
-            game.culcFinalResult()
+            game.calcFinalResult()
             it('player have 5000 chips', () => {
                 expect(game.player.chips).toBe(5000)
             })

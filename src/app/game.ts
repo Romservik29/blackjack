@@ -9,7 +9,8 @@ export enum GameStatus {
     DEALING, // dealing cards all players and dealer
     PLAYING_PLAYERS, //each player do hit|double|split|stand
     PLAYING_DEALER, // dealer do hits before hand score < some number
-    CULC_FINAL_RESULT, // before all player stand culculate final result
+    CALC_FINAL_RESULT, // before all player stand culculate final result
+    CLEAR_CARDS,
 }
 
 export class Game {
@@ -19,7 +20,6 @@ export class Game {
     status: GameStatus;
     players: Array<Player> = [];
     places: Array<TablePlace> = [];
-    timer: number = 0;
     constructor(dealerName: string, playerID: string, chips = 5000, deck = new Deck()) {
         this.player = new Player(playerID, chips)
         this.players.push(this.player)
@@ -36,15 +36,6 @@ export class Game {
     }
     setStatus = (status: GameStatus): void => {
         this.status = status
-    }
-    setTimer(time: number) {
-        this.timer = time
-        const timer = setTimeout(() => {
-            if (this.timer === 0) {
-                clearInterval(timer)
-            }
-            this.timer -= 1
-        }, 1000)
     }
     getPlace(placeId: number): TablePlace {
         const place = this.places.find((place) => place.id === placeId)
@@ -95,7 +86,6 @@ export class Game {
         place?.hands.push(place?.hands[handIdx].split())
     }
     stand(placeId: number, handIdx: number) {
-        alert("gameStand")
         const place = this.places.find((place) => place.id === placeId)
         if (place) {
             place?.hands[handIdx].stand()
@@ -160,7 +150,7 @@ export class Game {
         }
         return "lose"
     }
-    culcFinalResult(): void {
+    calcFinalResult(): void {
         const hands = this.getHandsHasBet()
         hands.forEach((hand) => {
             const result = this.getPlayerResult(hand.score, this.dealer.hand.score)
@@ -174,4 +164,5 @@ export class Game {
             }
         })
     }
+
 }

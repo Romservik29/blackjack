@@ -23,7 +23,20 @@ import * as BABYLON from '@babylonjs/core'
 import { autorun, reaction, toJS } from 'mobx';
 import { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import { Card } from './app/Card';
+import { AdvancedDynamicTextureInstrumentation } from '@babylonjs/gui';
 
+interface Place {
+    place: Mesh,
+    chips: Mesh[]
+    hands: HandPlace3d[]
+}
+interface HandPlace3d {
+    cards: Card3d[]
+}
+interface Card3d {
+    cardMesh: Mesh
+    card: Card
+}
 const game = new Game("Hero", "1234", 5000)
 
 export const createRoom = (canvas: HTMLCanvasElement) => {
@@ -43,25 +56,19 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
     table.position = new Vector3(0, 0.7, 0)
     const deckPosition = new Vector3(0, 0.71, 0)
     const dealer = createDealer(scene)
+    const dealer3d = {
+        placePosition: new Vector3(0, 0.71, -0.5),
+        cards: [] as Card3d[]
+    }
     //-------------------Places---------------------------------//
     const firstPlacePos = new Vector3((0.65), table.position.y + 0.001, 0.5)
-    interface Places {
-        place: Mesh,
-        hands: HandPlace3d[]
-    }
-    interface HandPlace3d {
-        cards: Card3d[]
-    }
-    interface Card3d {
-        cardMesh: Mesh
-        card: Card
-    }
-    const places3d: Places[] = []
+    const places3d: Place[] = []
     for (let i = 0; i < 3; i++) {
         const tablePlace = game.addPlace(i)
-        const place = CreatePlace(game.player.id, i, tablePlace, game.getStatus, scene)//TODO
+        const chips: Mesh[] = []
+        const place = CreatePlace(game.player.id, i, tablePlace, chips, game.getStatus, scene)//TODO
         place.position = new Vector3((firstPlacePos.x - i * 0.65), firstPlacePos.y, firstPlacePos.z)
-        places3d.push({ place: place, hands: [] })
+        places3d.push({ place: place, hands: [], chips })
     }
     const animCardStak: Array<{ mesh: Mesh, position: Vector3 }> = []
 
@@ -125,25 +132,26 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
         () => game.hasBet(),
         hasBet => {
             console.log("react")
-            if (hasBet) {
+            if (hasBet && game.status === GameStatus.WAITING_BETS) {
                 const timer = setTimeout(() => {
                     console.log("timer")
                     game.setStatus(GameStatus.DEALING)
                     stop()
+                    clearTimeout(timer)
                 }, 2000)
-
             }
         }
     )
     reaction(
         () => game.status,
-        status => {
+        async status => {
             switch (status) {
                 case GameStatus.WAITING_BETS: {
                     break;
                 }
                 case GameStatus.DEALING: {
-                    deal()
+                    await deal()
+                    game.setStatus(GameStatus.PLAYING_PLAYERS)
                     break;
                 }
                 case GameStatus.PLAYING_PLAYERS: {
@@ -157,8 +165,7 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
                                             console.log(card)
                                             if (hand3d.cards[cardIdx] === undefined) {
                                                 console.log(hand3d.cards[cardIdx])
-                                                const card3d: Card3d = { cardMesh: createCard(), card }
-                                                card3d.cardMesh.position = deckPosition
+                                                const card3d: Card3d = { cardMesh: createCard(deckPosition), card }
                                                 const place3d = places3d[placeIdx]
                                                 place3d.hands[handIdx].cards.push(card3d)
                                                 const { x, y, z } = place3d.place.getAbsolutePosition()
@@ -189,11 +196,18 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
                     break
                 }
                 case GameStatus.PLAYING_DEALER: {
-                    console.log(GameStatus.PLAYING_DEALER)
+                    await playDealer()
+                    game.setStatus(GameStatus.CALC_FINAL_RESULT)
                     break;
                 }
-                case GameStatus.CULC_FINAL_RESULT: {
-                    console.log(GameStatus.CULC_FINAL_RESULT)
+                case GameStatus.CALC_FINAL_RESULT: {
+                    await game.calcFinalResult()
+                    game.setStatus(GameStatus.CLEAR_CARDS)
+
+                    break;
+                }
+                case GameStatus.CLEAR_CARDS: {
+                    await clearTable()
                     break;
                 }
                 default: return
@@ -203,7 +217,7 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
     engine.runRenderLoop(() => {
         scene.render()
     })
-    const deal = async () => {
+    async function deal() {
         await game.deal()
         const hand3d: { mesh: Mesh, position: Vector3 }[][] = []
         game.places.forEach((place, idx) => {
@@ -211,8 +225,7 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
                 if (!places3d[idx].hands[handIdx]) {
                     const cards: Card3d[] = []
                     hand.cards.forEach((card) => {
-                        const card3d: Card3d = { cardMesh: createCard(), card }
-                        card3d.cardMesh.position = deckPosition
+                        const card3d: Card3d = { cardMesh: createCard(deckPosition), card }
                         cards.push(card3d)
                     })
                     const place3d = places3d[idx]
@@ -232,14 +245,14 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
             }
         }
         game.dealer.hand.cards.forEach((card, idx) => {
-            const card3d: Card3d = { cardMesh: createCard(), card }
-            card3d.cardMesh.position = deckPosition
-            animCardStak.push({ mesh: card3d.cardMesh, position: new Vector3(0 - (idx * 0.03), 0.71 + (idx * 0.001), -0.5 - (idx * 0.06)) })
+            const card3d: Card3d = { cardMesh: createCard(deckPosition), card }
+            dealer3d.cards.push(card3d)
+            const { x, y, z } = dealer3d.placePosition
+            animCardStak.push({ mesh: card3d.cardMesh, position: new Vector3(x - (idx * 0.03), y + (idx * 0.001), -0.5 - (z * 0.06)) })
         })
         await dealCard(animCardStak, scene)
         places3d.forEach((place, idx) => {
             if (place.hands[0]) {
-                const card = place.hands[0].cards[0].cardMesh
                 createHandScore(place.place, scene)
                 const { hitBtn } = createControls(idx, 0, scene)
                 hitBtn.parent = place.place
@@ -249,7 +262,40 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
                 hitBtn.rotation.x = Math.PI / 4
             }
         })
-        game.setStatus(GameStatus.PLAYING_PLAYERS)
+    }
+    async function playDealer() {
+        while (game.dealer.hand.score < 17) {
+            game.dealer.hand.takeCard(game.deck.takeCard())
+        }
+        game.dealer.hand.cards.forEach((card, cardIdx) => {
+            if (dealer3d.cards[cardIdx] === undefined) {
+                const card3d = createCard(deckPosition)
+                const { x, y, z } = dealer3d.placePosition
+                dealer3d.cards.push({ cardMesh: card3d, card })
+                animCardStak.push({ mesh: card3d, position: new Vector3(x - (cardIdx * 0.03), y + (cardIdx * 0.001), -0.5 - (z * 0.06)) })
+            }
+        })
+        await dealCard(animCardStak, scene)
+        animCardStak.length = 0
+    }
+
+    async function clearTable() {
+        await places3d.forEach(async (place) => {
+            await place.chips.forEach((chip) => {
+                chip.dispose()
+            })
+            place.chips.length = 0;
+            place.hands.forEach((hand) => {
+                hand.cards.forEach((card) => {
+                    card.cardMesh.dispose()
+                })
+            })
+        })
+        places3d.length = 0
+        await dealer3d.cards.forEach((card) => {
+            card.cardMesh.dispose()
+        })
+        dealer3d.cards.length = 0
     }
 }
 async function dealCard(cards: Array<{ mesh: Mesh, position: Vector3 }>, scene: Scene,) {
@@ -310,7 +356,7 @@ function createHandScore(place: Mesh, scene: Scene) {
     plane.material = mat;
     return plane
 }
-function CreatePlace(playerId: string, placeId: number, tablePlace: TablePlace, getStatus: () => GameStatus, scene: Scene) {
+function CreatePlace(playerId: string, placeId: number, tablePlace: TablePlace, chips: Mesh[], getStatus: () => GameStatus, scene: Scene) {
     const place = MeshBuilder.CreateDisc('place', { radius: 0.1, tessellation: 64 })
     let mat = new StandardMaterial('placeMat', scene)
     mat.diffuseColor = Color3.Yellow()
@@ -323,6 +369,7 @@ function CreatePlace(playerId: string, placeId: number, tablePlace: TablePlace, 
             if (player.chipInHand && getStatus() === GameStatus.WAITING_BETS) {
                 game.addChipsToBet(playerId, placeId)
                 const chip = createChip()
+                chips.push(chip)
                 const position = place.getAbsolutePosition()
                 chip.position = new Vector3(position.x, position.y, position.z)
                 //TODO: animation falling chip
@@ -335,7 +382,6 @@ function CreatePlace(playerId: string, placeId: number, tablePlace: TablePlace, 
     const namePlane = BABYLON.MeshBuilder.CreatePlane('place', { width: planeWidth, height: planeHeight })
     namePlane.parent = place
     namePlane.position.y = 0.15
-
     namePlane.rotation.z = Math.PI
     var DTWidth = 512;
     var DTHeight = 120;
@@ -355,8 +401,9 @@ function CreatePlace(playerId: string, placeId: number, tablePlace: TablePlace, 
     return place
 }
 
-function createCard(): Mesh {
+function createCard(position: Vector3): Mesh {
     const card = MeshBuilder.CreateBox('card', { width: 0.07, height: 0.01, depth: 0.1 })
+    card.position = position
     return card
 }
 
