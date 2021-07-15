@@ -1,6 +1,6 @@
 import { PlayerHand } from './PlayerHand';
 import { TablePlace } from './TablePlace';
-import { action, makeAutoObservable, observable, observe } from 'mobx';
+import { action, makeAutoObservable, observable, observe, toJS } from 'mobx';
 import { Dealer } from './Dealer';
 import { Deck } from './Deck';
 import { Player } from './Player';
@@ -49,16 +49,10 @@ export class Game {
         place.setPlayer(playerId)
     }
     addChipsToBet(playerId: string, placeId: number) {
-        const player = this.players.find((player) => player.id === playerId)
-        const place = this.places.find((place) => place.id === placeId)
-        if (player && this.player.chipInHand) {
-            player.minusChips(this.player.chipInHand!)
-            place?.addChipsToBet(this.player.chipInHand!)
-        } else if (!player) {
-            throw new Error("not found player")
-        } else {
-            throw new Error("haven't chips in hand")
-        }
+        const player = this.players.find((player) => player.id === playerId)!
+        const place = this.places.find((place) => place.id === placeId)!
+        player.minusChips(this.player.chipInHand)
+        place.addChipsToBet(this.player.chipInHand)
     }
     clearBet(placeId: number) {
         const place = this.places.find((place) => place.id === placeId)
@@ -164,5 +158,18 @@ export class Game {
             }
         })
     }
+    clearTable(): void {
+        this.places.forEach((place) => {
+            place.bet = 0
+            // if (place.hands[0] !== undefined) {
+            //     place.hands.length = 1
+            //     place.hands[0].cards.length = 0
+            //     place.hands[0].isStand = false
+            // }
 
+            place.hands.length = 0
+        })
+        this.dealer.hand.cards.length = 0
+        console.log(this.places)
+    }
 }

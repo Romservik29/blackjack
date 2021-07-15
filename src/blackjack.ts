@@ -66,56 +66,11 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
     for (let i = 0; i < 3; i++) {
         const tablePlace = game.addPlace(i)
         const chips: Mesh[] = []
-        const place = CreatePlace(game.player.id, i, tablePlace, chips, game.getStatus, scene)//TODO
+        const place = createPlace(game.player.id, i, tablePlace, chips, game.getStatus, scene)//TODO
         place.position = new Vector3((firstPlacePos.x - i * 0.65), firstPlacePos.y, firstPlacePos.z)
         places3d.push({ place: place, hands: [], chips })
     }
     const animCardStak: Array<{ mesh: Mesh, position: Vector3 }> = []
-
-    // autorun(//give cards all players who did bet
-    //     async () => {
-    //         const hand3d: { mesh: Mesh, position: Vector3 }[][] = []
-    //         game.places.forEach((place, idx) => {
-    //             place.hands.forEach((hand, handIdx) => {
-    //                 if (!places3d[idx].hands[handIdx]) {
-    //                     const cards: Card3d[] = []
-    //                     hand.cards.forEach((card) => {
-    //                         const card3d: Card3d = { cardMesh: createCard(), card }
-    //                         card3d.cardMesh.position = deckPosition
-    //                         cards.push(card3d)
-    //                     })
-    //                     const place3d = places3d[idx]
-    //                     place3d.hands.push({ cards })
-    //                     const animCards: Array<{ mesh: Mesh, position: Vector3 }> = []
-    //                     cards.forEach((card, idx) => {
-    //                         const { x, y, z } = place3d.place.getAbsolutePosition()
-    //                         animCards.push({ mesh: card.cardMesh, position: new Vector3(x - (idx * 0.03), y + (idx * 0.001), z - (idx * 0.06)) })
-    //                     })
-    //                     hand3d.push(animCards)
-    //                 }
-    //             })
-    //         })
-    //         for (let i = 0; i < 2; i++) {
-    //             for (let j = 0; j < hand3d.length; j++) {
-    //                 animCardStak.push(hand3d[j][i])
-    //             }
-    //         }
-    //         await dealCard(animCardStak, scene)
-    //         places3d.forEach((place, idx) => {
-    //             if (place.hands[0]) {
-    //                 const card = place.hands[0].cards[0].cardMesh
-    //                 createHandScore(place.place, scene, camera)
-    //                 const { hitBtn } = createControls(idx, 0, scene)
-    //                 hitBtn.parent = place.place
-    //                 hitBtn.position.x += 0.1
-    //                 hitBtn.position.y += 0.1
-    //                 hitBtn.position.z -= 0.05
-    //                 hitBtn.rotation.x = Math.PI / 4
-    //             }
-    //         })
-    //     }
-    // )
-
     // const deck = CreateDeck()
     // deck.parent = table
     // deck.position = new Vector3((-0.65), 0, (-0.5))
@@ -128,7 +83,7 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
     chip1.parent = table
     chip1.rotation.x = Math.PI / 2
     chip1.position.x = 0.5
-    const stop = reaction(
+    reaction(
         () => game.hasBet(),
         hasBet => {
             console.log("react")
@@ -136,7 +91,6 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
                 const timer = setTimeout(() => {
                     console.log("timer")
                     game.setStatus(GameStatus.DEALING)
-                    stop()
                     clearTimeout(timer)
                 }, 2000)
             }
@@ -203,11 +157,12 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
                 case GameStatus.CALC_FINAL_RESULT: {
                     await game.calcFinalResult()
                     game.setStatus(GameStatus.CLEAR_CARDS)
-
                     break;
                 }
                 case GameStatus.CLEAR_CARDS: {
-                    await clearTable()
+                    clearTable()
+                    game.clearTable()
+                    game.setStatus(GameStatus.WAITING_BETS)
                     break;
                 }
                 default: return
@@ -220,15 +175,17 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
     async function deal() {
         await game.deal()
         const hand3d: { mesh: Mesh, position: Vector3 }[][] = []
-        game.places.forEach((place, idx) => {
+        console.log(places3d)
+        game.places.forEach((place, placeIdx) => {
             place.hands.forEach((hand, handIdx) => {
-                if (!places3d[idx].hands[handIdx]) {
+                if (places3d[placeIdx].hands[handIdx] === undefined) {
+                    console.log(placeIdx, handIdx)
                     const cards: Card3d[] = []
                     hand.cards.forEach((card) => {
                         const card3d: Card3d = { cardMesh: createCard(deckPosition), card }
                         cards.push(card3d)
                     })
-                    const place3d = places3d[idx]
+                    const place3d = places3d[placeIdx]
                     place3d.hands.push({ cards })
                     const animCards: Array<{ mesh: Mesh, position: Vector3 }> = []
                     cards.forEach((card, idx) => {
@@ -279,26 +236,28 @@ export const createRoom = (canvas: HTMLCanvasElement) => {
         animCardStak.length = 0
     }
 
-    async function clearTable() {
-        await places3d.forEach(async (place) => {
-            await place.chips.forEach((chip) => {
+    function clearTable() {
+        places3d.forEach((place) => {
+            place.chips.forEach((chip) => {
                 chip.dispose()
             })
-            place.chips.length = 0;
+            place.chips.length = 0
             place.hands.forEach((hand) => {
                 hand.cards.forEach((card) => {
                     card.cardMesh.dispose()
                 })
             })
+            place.hands.length = 0
         })
-        places3d.length = 0
-        await dealer3d.cards.forEach((card) => {
+        dealer3d.cards.forEach((card) => {
             card.cardMesh.dispose()
         })
         dealer3d.cards.length = 0
+        animCardStak.length = 0
     }
 }
 async function dealCard(cards: Array<{ mesh: Mesh, position: Vector3 }>, scene: Scene,) {
+    console.log(cards)
     for (const card of cards) {
         await createAnimationCard(card.mesh, card.position, scene)
     }
@@ -356,7 +315,7 @@ function createHandScore(place: Mesh, scene: Scene) {
     plane.material = mat;
     return plane
 }
-function CreatePlace(playerId: string, placeId: number, tablePlace: TablePlace, chips: Mesh[], getStatus: () => GameStatus, scene: Scene) {
+function createPlace(playerId: string, placeId: number, tablePlace: TablePlace, chips: Mesh[], getStatus: () => GameStatus, scene: Scene) {
     const place = MeshBuilder.CreateDisc('place', { radius: 0.1, tessellation: 64 })
     let mat = new StandardMaterial('placeMat', scene)
     mat.diffuseColor = Color3.Yellow()

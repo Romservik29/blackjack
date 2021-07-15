@@ -2,12 +2,12 @@ import { makeAutoObservable } from 'mobx';
 
 export class Player {
     chips: number;
-    chipInHand: number | null;
+    chipInHand: number;
     id: string;
     constructor(id: string, chips: number) {
         this.id = id
         this.chips = chips
-        this.chipInHand = null
+        this.chipInHand = 100
         makeAutoObservable(this)
     }
     setChipInHand = (value: number): void => {
