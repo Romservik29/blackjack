@@ -1,9 +1,20 @@
 import { useCallback, useLayoutEffect, useRef } from "react";
 import "./App.css";
 import { createRoom } from "./blackjack"
+import { useStore } from './store'
+import { observer } from "mobx-react-lite";
+import TopBar from "./components/TopBar";
+import BottomBar from "./components/BottomBar";
+import GameButtons from "./components/Buttons/GameButtons";
+import DealerScore from "./components/DealerScore"
+import styled from "styled-components";
+import { toJS } from "mobx";
 
-export default function App(): JSX.Element {
+export default observer((): JSX.Element => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const divRef = useRef<HTMLDivElement | null>(null);
+  const gameStore = useStore("Game")
+
   const updateCanvas = useCallback(() => {
     if (canvasRef.current) {
       const currentRatio = window.innerWidth / window.innerHeight;
@@ -17,21 +28,36 @@ export default function App(): JSX.Element {
       canvasRef.current.style.height = height + "px";
       canvasRef.current.width = width;
       canvasRef.current.style.width = width + "px";
+      if (divRef.current) {
+        divRef.current.style.height = height + "px";
+        divRef.current.style.width = width + "px";
+      }
     }
+
   }, []);
+
   useLayoutEffect(() => {
-    if (canvasRef.current) {
+    if (canvasRef.current && divRef.current) {
       updateCanvas()
-      createRoom(canvasRef.current)
+      createRoom(canvasRef.current, gameStore)
     }
     window.addEventListener("resize", updateCanvas);
     return () => window.removeEventListener("resize", updateCanvas);
-  }, [updateCanvas]);
+  }, [updateCanvas, gameStore])
 
   return (
-    <div style={{ width: '100%', height: '100%' }}>
-      <canvas ref={canvasRef}></canvas>
-      {/* <BlackJack /> */}
+    <div>
+      <div style={{ position: "relative" }}>
+        {gameStore.handsHasBet.map((hand) => <GameButtons placeId={hand.placeId} handIdx={hand.idx} />)}
+        <canvas ref={canvasRef} style={{ position: "absolute", zIndex: 1 }}></canvas>
+        <div id="canvas_2d" ref={divRef} style={{ position: "absolute" }}>
+          <DealerScore />
+          <TopBar />
+          {console.log(toJS(gameStore))}
+          <BottomBar />
+        </div>
+      </div>
     </div>
   );
 }
+)

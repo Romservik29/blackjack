@@ -3,10 +3,12 @@ import { Card } from './Card';
 
 export class PlayerHand {
     placeId: number
+    idx: number
     cards: Array<Card> = []
     isStand = false
-    constructor(placeId: number) {
+    constructor(placeId: number, idx: number) {
         this.placeId = placeId
+        this.idx = idx
         makeAutoObservable(this)
     }
     takeCard(card: Card): void {
@@ -18,14 +20,14 @@ export class PlayerHand {
     double(card: Card) {
         this.cards.push(card)
     }
-    isSplitable(): boolean{
+    isSplitable(): boolean {
         if (this.cards.length === 2) {
             return this.cards[0].rank === this.cards[1].rank
         }
         throw new Error('have not first or second cards')
     }
-    split(): PlayerHand {
-        let newHand = new PlayerHand(this.placeId)
+    split(handIdx: number): PlayerHand {
+        let newHand = new PlayerHand(this.placeId, handIdx + 1)
         if (this.isSplitable()) {
             newHand.cards.push(this.cards.shift()!)
             return newHand

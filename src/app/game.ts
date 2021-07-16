@@ -1,6 +1,6 @@
 import { PlayerHand } from './PlayerHand';
 import { TablePlace } from './TablePlace';
-import { action, makeAutoObservable, observable, observe, toJS } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import { Dealer } from './Dealer';
 import { Deck } from './Deck';
 import { Player } from './Player';
@@ -12,6 +12,12 @@ export enum GameStatus {
     CALC_FINAL_RESULT, // before all player stand culculate final result
     CLEAR_CARDS,
 }
+interface Score {
+    value: number,
+    placeIdx: number,
+    handIdx: number
+}
+
 
 export class Game {
     player: Player;
@@ -31,8 +37,44 @@ export class Game {
     getStatus = (): GameStatus => {
         return this.status
     }
+    get allHandScors(): Score[] {
+        const scores: Score[] = []
+        this.handsHasBet.forEach((hand) => {
+            scores.push({ value: hand.score, placeIdx: hand.placeId, handIdx: hand.idx })
+        })
+        return scores
+    }
     get isAllStand(): boolean {
         return !this.places.some((place) => place.hands.some((hand) => hand.isStand === false))
+    }
+    get handsHasBet(): Array<PlayerHand> {
+        let hands: Array<PlayerHand> = []
+        this.places.forEach((place) => {
+            if (place.bet > 0) {
+                hands.push(...place.hands)
+            }
+        })
+        return hands
+    }
+    get gameStageInfo(): string {
+        switch (this.status) {
+            case GameStatus.WAITING_BETS: {
+                return "Waiting to players bets"
+            }
+            case GameStatus.DEALING: {
+                return "Deaing cards"
+            }
+            case GameStatus.PLAYING_PLAYERS: {
+                return "Players playing"
+            }
+            case GameStatus.PLAYING_DEALER: {
+                return "Dealer playing"
+            }
+            case GameStatus.CALC_FINAL_RESULT: {
+                return "Getting payments"
+            }
+            default: return ""
+        }
     }
     setStatus = (status: GameStatus): void => {
         this.status = status
@@ -69,15 +111,16 @@ export class Game {
     double(placeId: number, handIdx: number) {
         const place = this.places.find((place) => place.id === placeId)
         if (place) {
-            place.hands[handIdx].hit(this.deck.takeCard())
+            const hand = place.hands[handIdx]
+            hand.hit(this.deck.takeCard())
+            hand.stand()
             this.player.minusChips(place.bet)
             place.bet *= 2
-            // addChipsToBet(playerId, placeId, place.bet)
         }
     }
     split(placeId: number, handIdx: number) {
         const place = this.places.find((place) => place.id === placeId)
-        place?.hands.push(place?.hands[handIdx].split())
+        place?.hands.push(place?.hands[handIdx].split(handIdx))
     }
     stand(placeId: number, handIdx: number) {
         const place = this.places.find((place) => place.id === placeId)
@@ -100,22 +143,13 @@ export class Game {
         newDeck.shuffle()
         this.deck = newDeck
     }
-    getHandsHasBet(): Array<PlayerHand> {
-        let hands: Array<PlayerHand> = []
-        this.places.forEach((place) => {
-            if (place.bet > 0) {
-                hands.push(...place.hands)
-            }
-        })
-        return hands
-    }
     hasBet(): boolean {
         return this.places.some((place) => place.bet > 0)
     }
     deal(): void {
         this.places.forEach(place => {
             if (place.playerID !== null && place.bet > 0) {
-                const hand = new PlayerHand(place.id)
+                const hand = new PlayerHand(place.id, place.hands.length)
                 hand.cards = [this.deck.takeCard(), this.deck.takeCard()]
                 place.hands.push(hand);
             }
@@ -145,7 +179,7 @@ export class Game {
         return "lose"
     }
     calcFinalResult(): void {
-        const hands = this.getHandsHasBet()
+        const hands = this.handsHasBet
         hands.forEach((hand) => {
             const result = this.getPlayerResult(hand.score, this.dealer.hand.score)
             if (result === "win") {
@@ -161,12 +195,6 @@ export class Game {
     clearTable(): void {
         this.places.forEach((place) => {
             place.bet = 0
-            // if (place.hands[0] !== undefined) {
-            //     place.hands.length = 1
-            //     place.hands[0].cards.length = 0
-            //     place.hands[0].isStand = false
-            // }
-
             place.hands.length = 0
         })
         this.dealer.hand.cards.length = 0
