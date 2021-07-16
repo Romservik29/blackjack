@@ -376,8 +376,9 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         const panel = MeshBuilder.CreatePlane('dealerPlane', { height: 1, width: 1, sideOrientation: 1 })
         panel.position = new Vector3(0, 1, -1.5);
         const material = new StandardMaterial('dealerMat', scene)
-        material.opacityTexture = new Texture('./textures/dealer.png', scene)
-        material.diffuseTexture = new Texture('./textures/dealer.png', scene)
+        const texture = new Texture('./textures/dealer.png', scene)
+        material.opacityTexture = texture
+        material.diffuseTexture = texture
         panel.material = material
         return panel
     }
