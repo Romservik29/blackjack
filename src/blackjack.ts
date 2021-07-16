@@ -75,13 +75,6 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     // deck.position = new Vector3((-0.65), 0, (-0.5))
 
     camera.setTarget(table.position)
-    const chip = createChips(100, hlChips, hlChipInHand, game.player.setChipInHand, scene)
-    chip.parent = table
-    chip.rotation.x = Math.PI / 2
-    const chip1 = createChips(200, hlChips, hlChipInHand, game.player.setChipInHand, scene)
-    chip1.parent = table
-    chip1.rotation.x = Math.PI / 2
-    chip1.position.x = 0.5
     reaction(
         () => game.hasBet(),
         hasBet => {
@@ -207,17 +200,6 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
             animCardStak.push({ mesh: card3d.cardMesh, position: new Vector3(x - (idx * 0.03), y + (idx * 0.001), -0.5 - (z * 0.06)) })
         })
         await dealCard(animCardStak, scene)
-        places3d.forEach((place, idx) => {
-            if (place.hands[0]) {
-                createHandScore(place.place, scene)
-                const { hitBtn } = createControls(idx, 0, scene)
-                hitBtn.parent = place.place
-                hitBtn.position.x += 0.1
-                hitBtn.position.y += 0.1
-                hitBtn.position.z -= 0.05
-                hitBtn.rotation.x = Math.PI / 4
-            }
-        })
     }
     async function playDealer() {
         while (game.dealer.hand.score < 17) {
@@ -281,38 +263,39 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         await anim.waitAsync()
     }
 
-    function createHandScore(place: Mesh, scene: Scene) {
-        const size = 0.05;
-        const plane = BABYLON.MeshBuilder.CreatePlane("plane23", { size }, scene);
-        plane.parent = place
-        plane.position.x -= 0.1
-        plane.position.y += 0.1
-        plane.position.z -= 0.05
-        plane.rotation.x = Math.PI / 4
-        //Set font type
-        var font_type = "Arial";
+    // function createHandScore(place: Mesh, scene: Scene) {
+    //     const size = 0.05;
+    //     const plane = BABYLON.MeshBuilder.CreatePlane("plane23", { size }, scene);
+    //     plane.parent = place
+    //     plane.position.x -= 0.1
+    //     plane.position.y += 0.1
+    //     plane.position.z -= 0.05
+    //     plane.rotation.x = Math.PI / 4
+    //     //Set font type
+    //     var font_type = "Arial";
 
-        //Set width and height for dynamic texture using same multiplier
-        const DTWidth = size * 60;
-        const DTHeight = size * 60;
+    //     //Set width and height for dynamic texture using same multiplier
+    //     const DTWidth = size * 60;
+    //     const DTHeight = size * 60;
 
-        //Set text
-        //Create dynamic texture
-        var dynamicTexture = new DynamicTexture("texture", { width: DTWidth, height: DTHeight }, scene, true);
+    //     //Set text
+    //     //Create dynamic texture
+    //     var dynamicTexture = new DynamicTexture("texture", { width: DTWidth, height: DTHeight }, scene, true);
 
 
 
-        var font = "12px " + font_type;
-        dynamicTexture.drawText("text", 12, 12, font, "#000000", "#ffffff", true);
+    //     var font = "12px " + font_type;
+    //     dynamicTexture.drawText("text", 12, 12, font, "#000000", "#ffffff", true);
 
-        //create material
-        var mat = new BABYLON.StandardMaterial("mat", scene);
-        mat.diffuseTexture = dynamicTexture;
+    //     //create material
+    //     var mat = new BABYLON.StandardMaterial("mat", scene);
+    //     mat.diffuseTexture = dynamicTexture;
 
-        //apply material
-        plane.material = mat;
-        return plane
-    }
+    //     //apply material
+    //     plane.material = mat;
+    //     return plane
+    // }
+
     function createPlace(playerId: string, placeId: number, tablePlace: TablePlace, chips: Mesh[], getStatus: () => GameStatus, scene: Scene) {
         const place = MeshBuilder.CreateDisc('place', { radius: 0.1, tessellation: 64 })
         let mat = new StandardMaterial('placeMat', scene)
@@ -386,22 +369,24 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         const cylinder = MeshBuilder.CreateCylinder('chip', { height: 0.01, diameterTop: 0.03, diameterBottom: 0.03 })
         return cylinder
     }
-    function createChips(value: number, hl: HighlightLayer, hlchipInHand: HighlightLayer, takeChip: (value: number) => void, scene: Scene): Mesh {
-        const cylinder = MeshBuilder.CreateCylinder('chips', { height: 0.01, diameterTop: 0.03, diameterBottom: 0.03 })
-        cylinder.actionManager = new ActionManager(scene)
-        cylinder.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnLeftPickTrigger, () => {
-            takeChip(value)
-            hlchipInHand.removeAllMeshes()
-            hlchipInHand.addMesh(cylinder, Color3.Blue())
-        }))
-        cylinder.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPointerOverTrigger, () => {
-            hl.addMesh(cylinder, Color3.Red())
-        }))
-        cylinder.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPointerOutTrigger, () => {
-            hl.removeMesh(cylinder)
-        }))
-        return cylinder
-    }
+
+    // function createChips(value: number, hl: HighlightLayer, hlchipInHand: HighlightLayer, takeChip: (value: number) => void, scene: Scene): Mesh {
+    //     const cylinder = MeshBuilder.CreateCylinder('chips', { height: 0.01, diameterTop: 0.03, diameterBottom: 0.03 })
+    //     cylinder.actionManager = new ActionManager(scene)
+    //     cylinder.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnLeftPickTrigger, () => {
+    //         takeChip(value)
+    //         hlchipInHand.removeAllMeshes()
+    //         hlchipInHand.addMesh(cylinder, Color3.Blue())
+    //     }))
+    //     cylinder.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPointerOverTrigger, () => {
+    //         hl.addMesh(cylinder, Color3.Red())
+    //     }))
+    //     cylinder.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPointerOutTrigger, () => {
+    //         hl.removeMesh(cylinder)
+    //     }))
+    //     return cylinder
+    // }
+
     function createTable(scene: Scene): Mesh {
         const disc = BABYLON.MeshBuilder.CreateDisc("disc", { radius: 1.2, tessellation: 64 });
         const borderTable = BABYLON.MeshBuilder.CreateTorus('tableBorder', { diameter: 2.5, tessellation: 64, thickness: 0.1 })
@@ -413,72 +398,66 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         borderTable.rotation.x = Math.PI / 2
         return disc;
     }
-    interface ControlsBtn {
-        hitBtn: Mesh;
-        doubleBtn: Mesh;
-        splitBtn: Mesh;
-        standBtn: Mesh;
-    }
 
-    function createControls(placeIdx: number, handIdx: number, scene: Scene): ControlsBtn {
-        const hitBtn = createHitButton(placeIdx, handIdx, scene)
-        const doubleBtn = createDoubleButton(placeIdx, handIdx, scene)
-        doubleBtn.parent = hitBtn
-        doubleBtn.position.x = 0.05
-        const splitBtn = createSplitButton(placeIdx, handIdx, scene)
-        splitBtn.parent = doubleBtn
-        splitBtn.position.x = 0.05
-        const standBtn = createStandButton(placeIdx, handIdx, scene)
-        standBtn.parent = splitBtn
-        standBtn.position.x = 0.05
+    // function createControls(placeIdx: number, handIdx: number, scene: Scene): ControlsBtn {
+    //     const hitBtn = createHitButton(placeIdx, handIdx, scene)
+    //     const doubleBtn = createDoubleButton(placeIdx, handIdx, scene)
+    //     doubleBtn.parent = hitBtn
+    //     doubleBtn.position.x = 0.05
+    //     const splitBtn = createSplitButton(placeIdx, handIdx, scene)
+    //     splitBtn.parent = doubleBtn
+    //     splitBtn.position.x = 0.05
+    //     const standBtn = createStandButton(placeIdx, handIdx, scene)
+    //     standBtn.parent = splitBtn
+    //     standBtn.position.x = 0.05
 
-        return { hitBtn, doubleBtn, splitBtn, standBtn }
+    //     return { hitBtn, doubleBtn, splitBtn, standBtn }
 
-        function createHitButton(placeIdx: number, handIdx: number, scene: Scene) {
-            const plane = BABYLON.MeshBuilder.CreatePlane('hitBtn', { width: 0.05, height: 0.05 })
-            const material = new StandardMaterial('hitMat', scene)
-            material.diffuseColor = Color3.Black()
-            plane.material = material
-            plane.actionManager = new ActionManager(scene)
-            plane.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, () => {
-                game.hit(placeIdx, handIdx)
-            }))
-            return plane
-        }
-        function createDoubleButton(placeIdx: number, handIdx: number, scene: Scene) {
-            const plane = MeshBuilder.CreatePlane('hitBtn', { width: 0.05, height: 0.05 })
-            const material = new StandardMaterial('doubleMat', scene)
-            material.diffuseColor = Color3.Yellow()
-            plane.material = material
-            plane.actionManager = new ActionManager(scene)
-            plane.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
-                game.double(placeIdx, handIdx)
-            }))
-            return plane
-        }
-        function createSplitButton(placeIdx: number, handIdx: number, scene: Scene) {
-            const plane = MeshBuilder.CreatePlane('hitBtn', { width: 0.05, height: 0.05 })
-            const material = new StandardMaterial('hitMat', scene)
-            material.diffuseColor = Color3.Blue()
-            plane.material = material
-            plane.actionManager = new ActionManager(scene)
-            plane.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
-                game.split(placeIdx, handIdx)
-            }))
-            return plane
-        }
-        function createStandButton(placeIdx: number, handIdx: number, scene: Scene) {
-            const plane = BABYLON.MeshBuilder.CreatePlane('hitBtn', { width: 0.05, height: 0.05 })
-            const material = new StandardMaterial('material', scene)
-            material.diffuseColor = Color3.Red()
-            plane.material = material
-            plane.actionManager = new ActionManager(scene)
-            plane.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
-                game.stand(placeIdx, handIdx)
-            }))
-            return plane
-        }
-    }
+    //     function createHitButton(placeIdx: number, handIdx: number, scene: Scene) {
+    //         const plane = BABYLON.MeshBuilder.CreatePlane('hitBtn', { width: 0.05, height: 0.05 })
+    //         const material = new StandardMaterial('hitMat', scene)
+    //         material.diffuseColor = Color3.Black()
+    //         plane.material = material
+    //         plane.actionManager = new ActionManager(scene)
+    //         plane.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickUpTrigger, () => {
+    //             game.hit(placeIdx, handIdx)
+    //         }))
+    //         return plane
+    //     }
+    //     function createDoubleButton(placeIdx: number, handIdx: number, scene: Scene) {
+    //         const plane = MeshBuilder.CreatePlane('hitBtn', { width: 0.05, height: 0.05 })
+    //         const material = new StandardMaterial('doubleMat', scene)
+    //         material.diffuseColor = Color3.Yellow()
+    //         plane.material = material
+    //         plane.actionManager = new ActionManager(scene)
+    //         plane.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
+    //             game.double(placeIdx, handIdx)
+    //         }))
+    //         return plane
+    //     }
+    //     function createSplitButton(placeIdx: number, handIdx: number, scene: Scene) {
+    //         const plane = MeshBuilder.CreatePlane('hitBtn', { width: 0.05, height: 0.05 })
+    //         const material = new StandardMaterial('hitMat', scene)
+    //         material.diffuseColor = Color3.Blue()
+    //         plane.material = material
+    //         plane.actionManager = new ActionManager(scene)
+    //         plane.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
+    //             game.split(placeIdx, handIdx)
+    //         }))
+    //         return plane
+    //     }
+    //     function createStandButton(placeIdx: number, handIdx: number, scene: Scene) {
+    //         const plane = BABYLON.MeshBuilder.CreatePlane('hitBtn', { width: 0.05, height: 0.05 })
+    //         const material = new StandardMaterial('material', scene)
+    //         material.diffuseColor = Color3.Red()
+    //         plane.material = material
+    //         plane.actionManager = new ActionManager(scene)
+    //         plane.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
+    //             game.stand(placeIdx, handIdx)
+    //         }))
+    //         return plane
+    //     }
+    // }
 
     function CreateDeck(): Mesh {
         const box = MeshBuilder.CreateBox('deck', { width: 0.1, height: 0.15, depth: 0.1 })
