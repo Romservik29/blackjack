@@ -37,6 +37,10 @@ interface Card3d {
     cardMesh: Mesh
     card: Card
 }
+interface AnimationCard {
+    mesh: Mesh
+    position: Vector3
+}
 
 export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     const engine = new Engine(canvas)
@@ -44,6 +48,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     const camera = new UniversalCamera('camera1', new Vector3(0, Math.PI / 2, 2), scene)
     const hlChips = new BABYLON.HighlightLayer("hl-chips", scene);
     const hlChipInHand = new BABYLON.HighlightLayer("hl-chip-in-hand", scene);
+    const animCardStak: AnimationCard[] = []
     // const camera = new ArcRotateCamera('camera', Math.PI / 6, Math.PI, 1.5, new Vector3(0, 2.5, 1.7), scene)
     // camera.upperBetaLimit = Math.PI / 2.2;
     camera.attachControl(true)
@@ -69,7 +74,6 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         place.position = new Vector3((firstPlacePos.x - i * 0.65), firstPlacePos.y, firstPlacePos.z)
         places3d.push({ place: place, hands: [], chips })
     }
-    const animCardStak: Array<{ mesh: Mesh, position: Vector3 }> = []
     // const deck = CreateDeck()
     // deck.parent = table
     // deck.position = new Vector3((-0.65), 0, (-0.5))
@@ -214,7 +218,6 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
             }
         })
         await dealCard(animCardStak, scene)
-        animCardStak.length = 0
     }
 
     function clearTable() {
@@ -234,13 +237,12 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
             card.cardMesh.dispose()
         })
         dealer3d.cards.length = 0
-        animCardStak.length = 0
     }
     async function dealCard(cards: Array<{ mesh: Mesh, position: Vector3 }>, scene: Scene,) {
-        console.log(cards)
         for (const card of cards) {
             await createAnimationCard(card.mesh, card.position, scene)
         }
+        animCardStak.length = 0
     }
     async function createAnimationCard(card: Mesh, position: Vector3, scene: Scene) {
         console.log(card, position)
