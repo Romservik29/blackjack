@@ -1,4 +1,3 @@
-import { Camera } from '@babylonjs/core/Cameras/camera';
 import { Game, GameStatus } from './app/game';
 import { TablePlace } from './app/TablePlace';
 import {

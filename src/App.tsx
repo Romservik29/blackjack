@@ -7,7 +7,6 @@ import TopBar from "./components/TopBar";
 import BottomBar from "./components/BottomBar";
 import GameButtons from "./components/Buttons/GameButtons";
 import DealerScore from "./components/DealerScore"
-import styled from "styled-components";
 import { toJS } from "mobx";
 
 export default observer((): JSX.Element => {
