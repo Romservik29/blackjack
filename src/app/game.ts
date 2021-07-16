@@ -12,6 +12,12 @@ export enum GameStatus {
     CALC_FINAL_RESULT, // before all player stand culculate final result
     CLEAR_CARDS,
 }
+enum GameResult {
+    BLACKJACK,
+    WIN,
+    TIE,
+    LOSE,
+}
 interface Score {
     value: number,
     placeIdx: number,
@@ -84,51 +90,53 @@ export class Game {
         if (place) {
             return place
         }
-        throw new Error("place not find")
+        throw new Error("can't find place")
     }
-    setPlace(playerId: string, placeId: number) {
+    setPlace(placeId: number): void {
         const place = this.getPlace(placeId)
-        place.setPlayer(playerId)
+        place.setPlayer(this.player.id)
     }
-    addChipsToBet(playerId: string, placeId: number) {
-        const player = this.players.find((player) => player.id === playerId)!
-        const place = this.places.find((place) => place.id === placeId)!
-        player.minusChips(this.player.chipInHand)
+    addChipsToBet(placeId: number): void {
+        const place = this.getPlace(placeId)
+        this.player.minusChips(this.player.chipInHand)
         place.addChipsToBet(this.player.chipInHand)
     }
-    clearBet(placeId: number) {
-        const place = this.places.find((place) => place.id === placeId)
-        const player = this.players.find((player) => player.id === place?.playerID)
-        if (place) {
-            player?.addChips(place?.bet)
-            place.bet = 0
-        }
+    clearBet(placeId: number): void {
+        const place = this.getPlace(placeId)
+        this.player.addChips(place.bet)
+        place.bet = 0
     }
-    hit(placeId: number, handIdx: number) {
-        const place = this.places.find((place) => place.id === placeId)
-        place?.hands[handIdx].hit(this.deck.takeCard())
-    }
-    double(placeId: number, handIdx: number) {
-        const place = this.places.find((place) => place.id === placeId)
-        if (place) {
-            const hand = place.hands[handIdx]
-            hand.hit(this.deck.takeCard())
-            hand.stand()
-            this.player.minusChips(place.bet)
-            place.bet *= 2
-        }
-    }
-    split(placeId: number, handIdx: number) {
-        const place = this.places.find((place) => place.id === placeId)
-        place?.hands.push(place?.hands[handIdx].split(handIdx))
-    }
-    stand(placeId: number, handIdx: number) {
-        const place = this.places.find((place) => place.id === placeId)
-        if (place) {
-            place?.hands[handIdx].stand()
+    hit(placeId: number, handIdx: number): void {
+        const place = this.getPlace(placeId)
+        const hand = place.hands[handIdx]
+        if (hand.isStandOrOver) {
+            return
         } else {
-            throw new Error("place not found")
+            hand.hit(this.deck.takeCard())
         }
+    }
+    double(placeId: number, handIdx: number): void {
+        const place = this.getPlace(placeId)
+        const hand = place.hands[handIdx]
+        if (hand.isStandOrOver) {
+            return
+        }
+        hand.hit(this.deck.takeCard())
+        hand.stand()
+        this.player.minusChips(place.bet)
+        place.bet *= 2
+    }
+    split(placeId: number, handIdx: number): void {
+        const place = this.getPlace(placeId)
+        const hand = place.hands[handIdx]
+        if (hand.isStandOrOver) {
+            return
+        }
+        place.hands.push(hand.split(handIdx))
+    }
+    stand(placeId: number, handIdx: number): void {
+        const place = this.getPlace(placeId)
+        place.hands[handIdx].stand()
     }
     addPlace(id: number): TablePlace {
         const place = new TablePlace(id)
@@ -170,25 +178,43 @@ export class Game {
         throw new Error("player not found")
     }
 
-    getPlayerResult(playerHandVal: number, dealerHandVal: number): "win" | "tie" | "lose" {
-        if (playerHandVal === dealerHandVal) {
-            return "tie"
-        } else if (playerHandVal > dealerHandVal && playerHandVal < 22) {
-            return "win"
+    getHandResult(playerHand: PlayerHand): GameResult {
+        const dealerHand = this.dealer.hand
+        if (playerHand.score === 21 && dealerHand.score === 21) {
+            if (playerHand.cards.length === 2 && dealerHand.cards.length === 2) {
+                return GameResult.BLACKJACK
+            } else {
+                return GameResult.TIE
+            }
+        } else if (playerHand.score === this.dealer.hand.score) {
+            return GameResult.TIE
+        } else if (playerHand.score > this.dealer.hand.score && playerHand.score < 22) {
+            return GameResult.WIN
         }
-        return "lose"
+        return GameResult.LOSE
     }
     calcFinalResult(): void {
         const hands = this.handsHasBet
         hands.forEach((hand) => {
-            const result = this.getPlayerResult(hand.score, this.dealer.hand.score)
-            if (result === "win") {
-                const place = this.getPlace(hand.placeId)
-                const player = this.getPlayer(place.playerID!)
-                player.addChips(place.bet * 2)
-            } else if (result === "tie") {
-                const place = this.places.find((place) => place.id === hand.placeId)!
-                this.player.addChips(place.bet)
+            const result = this.getHandResult(hand)
+            const place = this.getPlace(hand.placeId)
+            switch (result) {
+                case GameResult.BLACKJACK: {
+                    this.player.addChips(place.bet * 2.5)
+                    break;
+                }
+                case GameResult.WIN: {
+                    this.player.addChips(place.bet * 2)
+                    break;
+                }
+                case GameResult.TIE: {
+                    this.player.addChips(place.bet)
+                    break;
+                }
+                case GameResult.LOSE: {
+                    break;
+                }
+                default: return
             }
         })
     }
@@ -198,6 +224,5 @@ export class Game {
             place.hands.length = 0
         })
         this.dealer.hand.cards.length = 0
-        console.log(this.places)
     }
 }

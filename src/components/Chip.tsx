@@ -44,7 +44,7 @@ export default observer(({ value }: ChipProps) => {
                 stroke="white"
                 stroke-width="8"
             />
-            <text fill="white" x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" style={{ pointerEvents: "none", fontWeight: 600 }}>
+            <text fill="black" x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" style={{ pointerEvents: "none", fontWeight: 600 }}>
                 {value}
             </text>
         </svg>

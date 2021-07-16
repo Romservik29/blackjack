@@ -78,15 +78,15 @@ describe("game cycle", () => {
         describe('getPlayersResult', () => {
             it('result equal win', () => {
                 const game = new Game("1", "2", 5)
-                expect(game.getPlayerResult(10, 5)).toBe("win")
+                expect(game.getHandResult(10, 5)).toBe("win")
             })
             it('result equal lose', () => {
                 const game = new Game("1", "2", 5)
-                expect(game.getPlayerResult(5, 10)).toBe("lose")
+                expect(game.getHandResult(5, 10)).toBe("lose")
             })
             it('result equal tie', () => {
                 const game = new Game("1", "2", 5)
-                expect(game.getPlayerResult(10, 10)).toBe("tie")
+                expect(game.getHandResult(10, 10)).toBe("tie")
             })
         })
     })

@@ -19,10 +19,9 @@ import {
     HighlightLayer,
 } from "@babylonjs/core";
 import * as BABYLON from '@babylonjs/core'
-import { autorun, reaction, toJS } from 'mobx';
+import { autorun, reaction } from 'mobx';
 import { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import { Card } from './app/Card';
-import { AdvancedDynamicTextureInstrumentation } from '@babylonjs/gui';
 
 interface Place {
     place: Mesh,
@@ -308,7 +307,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
             if (tablePlace.playerID) {
                 const { player } = game
                 if (player.chipInHand && getStatus() === GameStatus.WAITING_BETS) {
-                    game.addChipsToBet(playerId, placeId)
+                    game.addChipsToBet(placeId)
                     const chip = createChip()
                     chips.push(chip)
                     const position = place.getAbsolutePosition()

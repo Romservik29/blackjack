@@ -11,6 +11,12 @@ export class PlayerHand {
         this.idx = idx
         makeAutoObservable(this)
     }
+    get isStandOrOver(): boolean {
+        if (this.score > 21) {
+            return true
+        }
+        return this.isStand
+    }
     takeCard(card: Card): void {
         this.cards.push(card)
     }
