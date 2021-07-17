@@ -2,6 +2,9 @@ import styled from "styled-components"
 import GameStageInfo from "./GameStageInfo"
 
 const TopBarContainer = styled.div`
+display: flex;
+justify-content: center;
+align-items: center;
 position: absolute;
 z-index: 2;
 top: 0;

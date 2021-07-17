@@ -1,4 +1,4 @@
-import { makeAutoObservable } from 'mobx';
+import { makeAutoObservable, when } from 'mobx';
 import { Card } from './Card';
 
 export class PlayerHand {
@@ -10,6 +10,10 @@ export class PlayerHand {
         this.placeId = placeId
         this.idx = idx
         makeAutoObservable(this)
+        when(
+            () => this.isStandOrOver,
+            () => this.stand()
+        )
     }
     get isStandOrOver(): boolean {
         if (this.score > 21) {

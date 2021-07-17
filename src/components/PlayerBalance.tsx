@@ -4,9 +4,6 @@ import styled from 'styled-components'
 import { useStore } from '../store'
 
 const BalanceContainer = styled.div`
-position: absolute;
-bottom: 5%;
-left: 1%;
 display: flex;
 flex-direction: column;
 justify-content: center;
@@ -17,16 +14,16 @@ background-color: #000000b3;
 color: white;
 width: min-content;
 padding: 0.25em 1.5em 0.25em 1.5em;
-font-size: 16px;
+font-size: 1.2em;
 height: min-content;
 `
 
 export default observer(() => {
-    const store = useStore("Game")
+    const gameStore = useStore("Game")
     return (
         <BalanceContainer>
             <span>BALANCE</span>
-            <span>{store.player.chips}</span>
+            <span style={{ color: "yellow" }}>{gameStore.player.chips}</span>
         </BalanceContainer>
     )
 })

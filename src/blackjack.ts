@@ -135,6 +135,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
                     reaction(
                         () => game.isAllStand,
                         isAllStand => {
+                            console.log(isAllStand)
                             if (isAllStand) {
                                 playing()
                                 game.status = GameStatus.PLAYING_DEALER

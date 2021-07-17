@@ -1,9 +1,5 @@
 import { observer } from 'mobx-react-lite'
-import { useStore } from '../../store'
-import DoubleButton from './DoubleButton'
-import HitButton from './HitButton'
-import SplitButton from './SplitButton'
-import StandButton from './StandButton'
+import { useStore } from '../store'
 import styled from 'styled-components'
 
 type GameButtonsProps = {
@@ -12,15 +8,18 @@ type GameButtonsProps = {
 }
 
 const GameButtonsContainer = styled.div`
+    display: flex;
     position: absolute;
-    border: 1px solid black;
-    left: ${(props: { top: number }) => props.top + "px"};
+    top: 70%;
+    left: ${(props: { left: number }) => props.left + "%"};
     z-index: 3;
 `
-
+const Button = styled.div`
+font-size: 1em;
+cursor: pointer;
+`
 export default observer(({ placeId, handIdx }: GameButtonsProps) => {
     const gameStore = useStore("Game")
-    const handScore = gameStore.places[placeId].hands[handIdx].score
     function hit() {
         gameStore.hit(placeId, handIdx)
     }
@@ -33,14 +32,13 @@ export default observer(({ placeId, handIdx }: GameButtonsProps) => {
     function stand() {
         gameStore.stand(placeId, handIdx)
     }
-
+    const left = 14 + (placeId * 30)
     return (
-        <GameButtonsContainer top={placeId * 200}>
-            <HitButton hit={hit} />
-            <DoubleButton double={double} />
-            <SplitButton split={split} />
-            <StandButton stand={stand} />
-            <div>{handScore}</div>
+        <GameButtonsContainer left={left}>
+            <Button onClick={double} children="2х" />
+            <Button onClick={hit} children="+" />
+            <Button onClick={stand} children="-" />
+            <Button onClick={split} children="<>" />
         </GameButtonsContainer>
     )
 })

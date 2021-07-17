@@ -1,6 +1,5 @@
 import { PlayerHand } from './PlayerHand';
 import { makeAutoObservable } from 'mobx';
-import { Player } from './Player';
 export class TablePlace {
     id: number
     playerID: string | null

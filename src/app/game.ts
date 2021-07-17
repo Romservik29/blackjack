@@ -38,11 +38,13 @@ export class Game {
         this.dealer = new Dealer(dealerName)
         this.deck = deck
         this.status = GameStatus.WAITING_BETS
-        makeObservable(this, {
-            players: observable,
-            places: observable,
-            status: observable
-        })
+        makeAutoObservable(this)
+        // makeObservable(this, {
+        //     players: observable,
+        //     places: observable,
+        //     status: observable,
+        //     isAllStand: computed
+        // })
     }
     get allHandScors(): Score[] {
         const scores: Score[] = []
@@ -120,7 +122,7 @@ export class Game {
             return
         }
         hand.hit(this.deck.takeCard())
-        hand.stand()
+        hand.stand()    
         this.player.minusChips(place.bet)
         place.bet *= 2
     }

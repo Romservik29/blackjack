@@ -5,9 +5,11 @@ import { useStore } from './store'
 import { observer } from "mobx-react-lite";
 import TopBar from "./components/TopBar";
 import BottomBar from "./components/BottomBar";
-import GameButtons from "./components/Buttons/GameButtons";
+import GameButtons from "./components/GameButtons";
 import DealerScore from "./components/DealerScore"
 import { toJS } from "mobx";
+import Score from "./components/Score";
+import ScoreItems from "./components/ScoreItems";
 
 export default observer((): JSX.Element => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -30,6 +32,7 @@ export default observer((): JSX.Element => {
       if (divRef.current) {
         divRef.current.style.height = height + "px";
         divRef.current.style.width = width + "px";
+        divRef.current.style.fontSize = width / 1340.4 + "em"
       }
     }
 
@@ -47,12 +50,12 @@ export default observer((): JSX.Element => {
   return (
     <div>
       <div style={{ position: "relative" }}>
-        {gameStore.handsHasBet.map((hand) => <GameButtons placeId={hand.placeId} handIdx={hand.idx} />)}
         <canvas ref={canvasRef} style={{ position: "absolute", zIndex: 1 }}></canvas>
         <div id="canvas_2d" ref={divRef} style={{ position: "absolute" }}>
           <DealerScore />
+          <ScoreItems />
+          {gameStore.handsHasBet.map((hand) => <GameButtons placeId={hand.placeId} handIdx={hand.idx} />)}
           <TopBar />
-          {console.log(toJS(gameStore))}
           <BottomBar />
         </div>
       </div>

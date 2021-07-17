@@ -16,6 +16,9 @@ background-color: #0000ff2d;
 
 const LeftBar = styled.div`
 width: 25%;
+padding: 10px;
+display: flex;
+align-items: flex-end;
 `
 
 const CenterBar = styled.div`
@@ -34,7 +37,9 @@ export default function BottomBar() {
     return (
         <BottomBarContainer>
             <LeftBar>
-                <PlayerChips />
+                <div>
+                    <PlayerChips />
+                </div>
             </LeftBar>
             {status === GameStatus.WAITING_BETS
                 && <CenterBar>
