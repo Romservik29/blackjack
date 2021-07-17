@@ -122,7 +122,7 @@ export class Game {
             return
         }
         hand.hit(this.deck.takeCard())
-        hand.stand()    
+        hand.stand()
         this.player.minusChips(place.bet)
         place.bet *= 2
     }

@@ -4,7 +4,7 @@ import styled from 'styled-components'
 
 type GameButtonsProps = {
     placeId: number,
-    handIdx: number
+    handIdx: number,
 }
 
 const GameButtonsContainer = styled.div`
@@ -16,7 +16,16 @@ const GameButtonsContainer = styled.div`
 `
 const Button = styled.div`
 font-size: 1em;
+font-weight: 700;
 cursor: pointer;
+color: white;
+border-radius: 50%;
+width: 3em;
+height: 3em;
+display: flex;
+justify-content: center;
+align-items: center;
+background-color: ${(props: { bgColor: string }) => props.bgColor};
 `
 export default observer(({ placeId, handIdx }: GameButtonsProps) => {
     const gameStore = useStore("Game")
@@ -35,10 +44,10 @@ export default observer(({ placeId, handIdx }: GameButtonsProps) => {
     const left = 14 + (placeId * 30)
     return (
         <GameButtonsContainer left={left}>
-            <Button onClick={double} children="2х" />
-            <Button onClick={hit} children="+" />
-            <Button onClick={stand} children="-" />
-            <Button onClick={split} children="<>" />
+            <Button bgColor="orange" onClick={double} children="2x" />
+            <Button bgColor="green" onClick={hit} children="+" />
+            <Button bgColor="red" onClick={stand} children="౼" />
+            <Button bgColor="teal" onClick={split} children="<>" />
         </GameButtonsContainer>
     )
 })
