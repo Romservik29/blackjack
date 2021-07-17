@@ -68,7 +68,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     for (let i = 0; i < 3; i++) {
         const tablePlace = game.addPlace(i)
         const chips: Mesh[] = []
-        const place = createPlace(game.player.id, i, tablePlace, chips, game.getStatus, scene)//TODO
+        const place = createPlace(game.player.id, i, tablePlace, chips, scene)
         place.position = new Vector3((firstPlacePos.x - i * 0.65), firstPlacePos.y, firstPlacePos.z)
         places3d.push({ place: place, hands: [], chips })
     }
@@ -84,7 +84,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
             if (hasBet && game.status === GameStatus.WAITING_BETS) {
                 const timer = setTimeout(() => {
                     console.log("timer")
-                    game.setStatus(GameStatus.DEALING)
+                    game.status = GameStatus.DEALING
                     clearTimeout(timer)
                 }, 2000)
             }
@@ -99,7 +99,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
                 }
                 case GameStatus.DEALING: {
                     await deal()
-                    game.setStatus(GameStatus.PLAYING_PLAYERS)
+                    game.status = GameStatus.PLAYING_PLAYERS
                     break;
                 }
                 case GameStatus.PLAYING_PLAYERS: {
@@ -137,7 +137,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
                         isAllStand => {
                             if (isAllStand) {
                                 playing()
-                                game.setStatus(GameStatus.PLAYING_DEALER)
+                                game.status = GameStatus.PLAYING_DEALER
                             }
                         }
                     )
@@ -145,18 +145,18 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
                 }
                 case GameStatus.PLAYING_DEALER: {
                     await playDealer()
-                    game.setStatus(GameStatus.CALC_FINAL_RESULT)
+                    game.status = GameStatus.CALC_FINAL_RESULT
                     break;
                 }
                 case GameStatus.CALC_FINAL_RESULT: {
                     game.calcFinalResult()
-                    setTimeout(() => game.setStatus(GameStatus.CLEAR_CARDS), 3000)
+                    setTimeout(() => game.status = GameStatus.CLEAR_CARDS, 3000)
                     break;
                 }
                 case GameStatus.CLEAR_CARDS: {
                     clearTable()
                     game.clearTable()
-                    game.setStatus(GameStatus.WAITING_BETS)
+                    game.status = GameStatus.WAITING_BETS
                     break;
                 }
                 default: return
@@ -296,7 +296,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     //     return plane
     // }
 
-    function createPlace(playerId: string, placeId: number, tablePlace: TablePlace, chips: Mesh[], getStatus: () => GameStatus, scene: Scene) {
+    function createPlace(playerId: string, placeId: number, tablePlace: TablePlace, chips: Mesh[], scene: Scene) {
         const place = MeshBuilder.CreateDisc('place', { radius: 0.1, tessellation: 64 })
         let mat = new StandardMaterial('placeMat', scene)
         mat.diffuseColor = Color3.Yellow()
@@ -306,7 +306,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         place.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
             if (tablePlace.playerID) {
                 const { player } = game
-                if (player.chipInHand && getStatus() === GameStatus.WAITING_BETS) {
+                if (player.chipInHand && game.status === GameStatus.WAITING_BETS) {
                     game.addChipsToBet(placeId)
                     const chip = createChip()
                     chips.push(chip)

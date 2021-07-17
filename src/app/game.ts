@@ -1,6 +1,6 @@
 import { PlayerHand } from './PlayerHand';
 import { TablePlace } from './TablePlace';
-import { makeAutoObservable } from 'mobx';
+import { computed, makeAutoObservable } from 'mobx';
 import { Dealer } from './Dealer';
 import { Deck } from './Deck';
 import { Player } from './Player';
@@ -39,9 +39,6 @@ export class Game {
         this.deck = deck
         this.status = GameStatus.WAITING_BETS
         makeAutoObservable(this)
-    }
-    getStatus = (): GameStatus => {
-        return this.status
     }
     get allHandScors(): Score[] {
         const scores: Score[] = []
@@ -82,10 +79,7 @@ export class Game {
             default: return ""
         }
     }
-    setStatus = (status: GameStatus): void => {
-        this.status = status
-    }
-    getPlace(placeId: number): TablePlace {
+    private getPlace(placeId: number): TablePlace {
         const place = this.places.find((place) => place.id === placeId)
         if (place) {
             return place
@@ -170,7 +164,7 @@ export class Game {
         }
     }
 
-    getPlayer(playerId: string): Player {
+    private getPlayer(playerId: string): Player {
         const player = this.players.find((player) => playerId === player.id)
         if (player) {
             return player
