@@ -1,14 +1,17 @@
-import { makeAutoObservable } from 'mobx';
+import { makeObservable, observable } from 'mobx';
 
 export class Player {
+    readonly id: string;
     chips: number;
     chipInHand: number;
-    id: string;
     constructor(id: string, chips: number) {
         this.id = id
         this.chips = chips
         this.chipInHand = 100
-        makeAutoObservable(this)
+        makeObservable(this, {
+            chips: observable,
+            chipInHand: observable
+        })
     }
     setChipInHand = (value: number): void => {
         this.chipInHand = value
