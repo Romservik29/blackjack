@@ -1,6 +1,6 @@
 import { PlayerHand } from './PlayerHand';
 import { TablePlace } from './TablePlace';
-import { computed, makeAutoObservable } from 'mobx';
+import { computed, makeAutoObservable, makeObservable, observable } from 'mobx';
 import { Dealer } from './Dealer';
 import { Deck } from './Deck';
 import { Player } from './Player';
@@ -38,7 +38,11 @@ export class Game {
         this.dealer = new Dealer(dealerName)
         this.deck = deck
         this.status = GameStatus.WAITING_BETS
-        makeAutoObservable(this)
+        makeObservable(this, {
+            players: observable,
+            places: observable,
+            status: observable
+        })
     }
     get allHandScors(): Score[] {
         const scores: Score[] = []
