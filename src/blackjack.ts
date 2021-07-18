@@ -1,3 +1,4 @@
+import { Color } from './color';
 import { Game, GameStatus } from './app/game';
 import { TablePlace } from './app/TablePlace';
 import {
@@ -49,10 +50,10 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     const hlChips = new BABYLON.HighlightLayer("hl-chips", scene);
     const hlChipInHand = new BABYLON.HighlightLayer("hl-chip-in-hand", scene);
     const animCardStak: AnimationCard[] = []
-    const camera = new ArcRotateCamera('camera', Math.PI / 2, Math.PI / 2.8, 2, new Vector3(0, 0.7, 0), scene)
+    const camera = new ArcRotateCamera('camera', Math.PI / 2, Math.PI / 2.8, 1.9, new Vector3(0, 0.7, 0), scene)
     // camera.upperBetaLimit = Math.PI / 2.2;
     camera.attachControl(true)
-    var light = new BABYLON.HemisphericLight("dir01", new BABYLON.Vector3(0, 1, 0), scene);
+    var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
     light.intensity = 1;
     //------------------------------------------------------------//
     const floor = createFloor(scene)
@@ -65,13 +66,14 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         cards: [] as Card3d[]
     }
     //-------------------Places---------------------------------//
-    const firstPlacePos = new Vector3((0.5), table.position.y + 0.001, 0.5)
+    const firstPlacePos = new Vector3((0.4), table.position.y + 0.001, 0.7)
     const places3d: Place[] = []
     for (let i = 0; i < 3; i++) {
         const tablePlace = game.addPlace(i)
         const chips: Mesh[] = []
         const place = createPlace(game.player.id, i, tablePlace, chips, scene)
-        place.position = new Vector3((firstPlacePos.x - i * 0.5), firstPlacePos.y, firstPlacePos.z)
+        let pos = i % 2 === 0 ? 0 : 0.10
+        place.position = new Vector3((firstPlacePos.x - i * 0.4), firstPlacePos.y, firstPlacePos.z + pos)
         places3d.push({ place: place, hands: [], chips })
     }
     // const deck = CreateDeck()
@@ -120,7 +122,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
                                                     mesh: card3d.cardMesh,
                                                     position: new Vector3(
                                                         x - (cardIdx * 0.03),
-                                                        y - (cardIdx * 0.001),
+                                                        y + (cardIdx * 0.001),
                                                         z - (cardIdx * 0.06 + 0.15)
                                                     )
                                                 }
@@ -199,7 +201,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
             const card3d: Card3d = { cardMesh: createCard(card.rank, card.suit, deckPosition), card }
             dealer3d.cards.push(card3d)
             const { x, y, z } = dealer3d.placePosition
-            animCardStak.push({ mesh: card3d.cardMesh, position: new Vector3(x - (idx * 0.03), y + (idx * 0.002), -0.5 - (z * 0.06)) })
+            animCardStak.push({ mesh: card3d.cardMesh, position: new Vector3(x - (idx * 0.03), y + (idx * 0.001), -0.5 - (z * 0.06)) })
         })
         await dealCard(animCardStak, scene)
     }
@@ -212,7 +214,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
                 const card3d = createCard(card.rank, card.suit, deckPosition)
                 const { x, y, z } = dealer3d.placePosition
                 dealer3d.cards.push({ cardMesh: card3d, card })
-                animCardStak.push({ mesh: card3d, position: new Vector3(x - (cardIdx * 0.03), y + (cardIdx * 0.002), -0.5 - (z * 0.06)) })
+                animCardStak.push({ mesh: card3d, position: new Vector3(x - (cardIdx * 0.03), y + (cardIdx * 0.001), -0.5 - (z * 0.06)) })
             }
         })
         await dealCard(animCardStak, scene)
@@ -298,10 +300,13 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
 
     function createPlace(playerId: string, placeId: number, tablePlace: TablePlace, chips: Mesh[], scene: Scene) {
         const place = MeshBuilder.CreateDisc('place', { radius: 0.07, tessellation: 64 })
-        let mat = new StandardMaterial('placeMat', scene)
-        mat.diffuseColor = Color3.Yellow()
+        const material = new StandardMaterial('place-ellipse-mat', scene)
+        const texture = new Texture('./textures/ellipse.png', scene)
+        material.opacityTexture = texture
+        material.diffuseTexture = texture
         place.rotation.x = Math.PI / 2
-        place.material = mat
+        place.material = material
+
         place.actionManager = new ActionManager(scene)
         place.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
             if (tablePlace.playerID) {
@@ -317,26 +322,24 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
             }
         }))
         //--------------//
-        const planeWidth = 0.3;
-        const planeHeight = 0.07;
-        const namePlane = BABYLON.MeshBuilder.CreatePlane('place', { width: planeWidth, height: planeHeight })
+        const namePlane = BABYLON.MeshBuilder.CreatePlane('place', { width:0.06, height: 0.06 })
         namePlane.parent = place
-        namePlane.position.y = 0.15
+        namePlane.position.y += 0.001
         namePlane.rotation.z = Math.PI
-        var DTWidth = 512;
-        var DTHeight = 120;
-        const textureName = new DynamicTexture('name-texture', { width: DTWidth, height: DTHeight }, scene, true);
+        var DTWidth = 256;
+        var DTHeight = 256;
+        const textureName = new DynamicTexture('name-texture',{ width: DTWidth, height: DTHeight }, scene, true);
         const text = "seat"
-        var font = "64px monospace";
+        var font = "128px monospace";
         const nameMat = new StandardMaterial("nameMat", scene);
         nameMat.diffuseTexture = textureName
         namePlane.material = nameMat
-        textureName.drawText(text, null, null, font, "black", "white", true)
+        textureName.drawText(text, null, null, font, "black", Color.green, true)
         namePlane.actionManager = new ActionManager(scene)
         namePlane.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
             textureName.clear()
             tablePlace.setPlayer(playerId)
-            textureName.drawText(tablePlace.playerID ?? "unknow", null, null, font, "black", "white", true)
+            textureName.drawText("bet", null, null, font, "yellow", Color.green, true)
         }))
         return place
     }
@@ -363,7 +366,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         return ground
     }
     function createDealer(scene: Scene): Mesh {
-        const panel = MeshBuilder.CreatePlane('dealerPlane', { height: 1, width: 1, sideOrientation: 1 })
+        const panel = MeshBuilder.CreatePlane('dealerPlane', { height: 0.7, width: 0.7, sideOrientation: 1 })
         panel.position = new Vector3(0, 1, -1);
         const material = new StandardMaterial('dealerMat', scene)
         const texture = new Texture('./textures/dealer.png', scene)
@@ -400,7 +403,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         disc.rotation.x = Math.PI / 2
         disc.rotation.z = Math.PI / 2
         const mat = new StandardMaterial('tableDiscMat', scene)
-        mat.emissiveColor = new Color3(0, 0.7, 0)
+        mat.emissiveColor = Color3.FromHexString("#0bcd3a")
         mat.disableLighting = true
         mat.specularColor = new BABYLON.Color3(0, 0, 0);
         disc.material = mat
