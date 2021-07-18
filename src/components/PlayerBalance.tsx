@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react-lite'
 import React from 'react'
 import styled from 'styled-components'
+import { Color } from '../color'
 import { useStore } from '../store'
 
 const BalanceContainer = styled.div`
@@ -23,7 +24,7 @@ export default observer(() => {
     return (
         <BalanceContainer>
             <span>BALANCE</span>
-            <span style={{ color: "yellow" }}>{gameStore.player.chips}</span>
+            <span style={{ color: Color.yellow }}>{gameStore.player.chips}</span>
         </BalanceContainer>
     )
 })

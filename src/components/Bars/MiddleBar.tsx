@@ -1,4 +1,6 @@
 import styled from 'styled-components'
+import { GameStatus } from '../../app/game'
+import { useStore } from '../../store'
 import Chips from '../Chips'
 
 const StyledMiddleBar = styled.div`
@@ -13,9 +15,10 @@ height: 15%;
 `
 
 export default function MiddleBar() {
+    const gameStore = useStore("Game")
     return (
         <StyledMiddleBar>
-            <Chips />
+            {gameStore.status === GameStatus.WAITING_BETS && < Chips />}
         </StyledMiddleBar>
     )
 }
