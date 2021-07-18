@@ -44,6 +44,7 @@ interface AnimationCard {
 const CARD_WIDTH = 0.09
 const CARD_HEIGHT = 0.06
 const PLACE_RADIUS = 0.07
+const FRAME_RATE = 60
 
 export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     const engine = new Engine(canvas)
@@ -69,7 +70,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     }
     //-------------------Places---------------------------------//
     const firstPlacePos = new Vector3((0.4), table.position.y + 0.001, 0.7)
-    const ChipStartPos = new Vector3(0, 0, 1)
+    const ChipStartPos = new Vector3(0, 0.9, 0)
     const places3d: Place[] = []
     for (let i = 0; i < 3; i++) {
         const tablePlace = game.addPlace(i)
@@ -229,9 +230,9 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
                 animCardStak.push({
                     mesh: card3d,
                     position: new Vector3(
-                        x - (cardIdx * 0.03),
+                        x - (cardIdx * CARD_WIDTH / 2),
                         y + (cardIdx * 0.001),
-                        z + (cardIdx * 0.09))
+                        z)
                 })
             }
         })
@@ -264,8 +265,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     }
     async function createAnimationCard(card: Mesh, position: Vector3, scene: Scene) {
         console.log(card, position)
-        const frameRate = 30
-        const moveAnimation = new Animation("card-move-animation", "position", frameRate, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
+        const moveAnimation = new Animation("card-move-animation", "position", FRAME_RATE, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
         const moveFrames = [];
         moveFrames.push({
             frame: 0,
@@ -273,31 +273,60 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         });
         const { x, y, z } = position;
         moveFrames.push({
-            frame: frameRate / 2,
+            frame: FRAME_RATE / 2,
             value: new Vector3(x - (x / 2), y + 0.15, z - (z / 2))
         });
         moveFrames.push({
-            frame: frameRate,
+            frame: FRAME_RATE,
             value: position
         });
 
         moveAnimation.setKeys(moveFrames);
 
-        const rotateAnimation = new Animation("card-rotate-animation", "rotation.z", frameRate, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CONSTANT);
+        const rotateAnimation = new Animation("card-rotate-animation", "rotation.z", FRAME_RATE, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CONSTANT);
         const rotateFrames = []
         rotateFrames.push({
             frame: 0,
             value: Math.PI
         });
         rotateFrames.push({
-            frame: frameRate,
+            frame: FRAME_RATE,
             value: 0
         });
         rotateAnimation.setKeys(rotateFrames)
         card.animations.push(moveAnimation)
         card.animations.push(rotateAnimation)
-        const anim = scene.beginAnimation(card, 0, frameRate, false);
+        const anim = scene.beginAnimation(card, 0, FRAME_RATE, false);
         await anim.waitAsync()
+    }
+
+    function betChipAnimation(chip: Mesh, position: Vector3, scene: Scene) {
+        const moveAnimation = new Animation("move", "position", FRAME_RATE, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT)
+        const moveKeys = []
+        moveKeys.push({
+            frame: 0,
+            value: chip.position
+        })
+        moveKeys.push({
+            frame: FRAME_RATE,
+            value: position
+        })
+        moveAnimation.setKeys(moveKeys)
+        chip.animations.push(moveAnimation)
+        const rotateAnimation = new Animation("move", "rotation.x", FRAME_RATE, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CONSTANT)
+        const rotateKeys = []
+        rotateKeys.push({
+            frame: 0,
+            value: Math.PI / 2
+        })
+        rotateKeys.push({
+            frame: FRAME_RATE,
+            value: 0
+        })
+        rotateAnimation.setKeys(rotateKeys)
+        chip.animations.push(moveAnimation)
+        chip.animations.push(rotateAnimation)
+        scene.beginAnimation(chip, 0, FRAME_RATE, false, 4)
     }
 
     function createPlace(playerId: string, placeId: number, tablePlace: TablePlace, chips: Mesh[], scene: Scene) {
@@ -330,10 +359,9 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
                 if (player.chipInHand && game.status === GameStatus.WAITING_BETS) {
                     game.addChipsToBet(placeId)
                     const chip = createChip()
+                    chip.position = ChipStartPos;
+                    betChipAnimation(chip, place.getAbsolutePosition(), scene)
                     chips.push(chip)
-                    const position = place.getAbsolutePosition()
-                    chip.position = new Vector3(position.x, position.y, position.z)
-                    //TODO: animation falling chip
                 }
             } else {
                 textureName.clear()
@@ -397,7 +425,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         return panel
     }
     function createChip(): Mesh {
-        const cylinder = MeshBuilder.CreateCylinder('chip', { height: 0.01, diameterTop: 0.05, diameterBottom: 0.03 })
+        const cylinder = MeshBuilder.CreateCylinder('chip', { height: 0.01, diameterTop: 0.05, diameterBottom: 0.05 })
         return cylinder
     }
 
@@ -418,9 +446,11 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     function createDeck(): Mesh[] {
         const cards = []
         //TODO: do real deck cards
+        const { x, y, z } = deckPosition
+        let posY = y
         for (let i = 0; i < 52; i++) {
-            const { x, y, z } = deckPosition
-            cards.push(createCard("2", "Heart", new Vector3(x, y - (+`0.0${i}`), z)))
+            cards.push(createCard("2", "Heart", new Vector3(x, posY, z)))
+            posY -= 0.001
         }
         return cards
     }
