@@ -68,7 +68,7 @@ export class Game {
     get gameStageInfo(): string {
         switch (this.status) {
             case GameStatus.WAITING_BETS: {
-                return "Waiting to players bets"
+                return "Place your bets"
             }
             case GameStatus.DEALING: {
                 return "Deaing cards"

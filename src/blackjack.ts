@@ -43,6 +43,7 @@ interface AnimationCard {
 }
 const CARD_WIDTH = 0.09
 const CARD_HEIGHT = 0.06
+const PLACE_RADIUS = 0.07
 
 export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     const engine = new Engine(canvas)
@@ -60,7 +61,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     const floor = createFloor(scene)
     const table = createTable(scene)
     table.position = new Vector3(0, 0.7, 0)
-    const deckPosition = new Vector3(-0.5, 0.71, 0)
+    const deckPosition = new Vector3(-0.5, 0.753, 0)
     const dealer = createDealer(scene)
     const dealer3d = {
         placePosition: new Vector3(0, 0.71, -0.1),
@@ -78,10 +79,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         place.position = new Vector3((firstPlacePos.x - i * 0.4), firstPlacePos.y, firstPlacePos.z + pos)
         places3d.push({ place: place, hands: [], chips })
     }
-    // const deck = CreateDeck()
-    // deck.parent = table
-    // deck.position = new Vector3((-0.65), 0, (-0.5))
-
+    const deck = createDeck()
     reaction(
         () => game.hasBet(),
         hasBet => {
@@ -125,7 +123,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
                                                     position: new Vector3(
                                                         x - (cardIdx * CARD_WIDTH / 2),
                                                         y + (cardIdx * 0.001),
-                                                        z - (cardIdx * CARD_HEIGHT / 2 + 0.15)
+                                                        z - (cardIdx * CARD_HEIGHT / 2 + PLACE_RADIUS * 2)
                                                     )
                                                 }
                                                 createAnimationCard(animcard.mesh, animcard.position, scene)
@@ -188,7 +186,13 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
                     const animCards: Array<{ mesh: Mesh, position: Vector3 }> = []
                     cards.forEach((card, idx) => {
                         const { x, y, z } = place3d.place.getAbsolutePosition()
-                        animCards.push({ mesh: card.cardMesh, position: new Vector3(x - (idx * 0.03), y + (idx * 0.001), z - (idx * 0.1 + 0.15)) })
+                        animCards.push({
+                            mesh: card.cardMesh,
+                            position: new Vector3(
+                                x - (idx * CARD_WIDTH / 2),
+                                y + (idx * 0.001),
+                                z - (idx * CARD_HEIGHT / 2 + PLACE_RADIUS * 2))
+                        })
                     })
                     hand3d.push(animCards)
                 }
@@ -203,7 +207,13 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
             const card3d: Card3d = { cardMesh: createCard(card.rank, card.suit, deckPosition), card }
             dealer3d.cards.push(card3d)
             const { x, y, z } = dealer3d.placePosition
-            animCardStak.push({ mesh: card3d.cardMesh, position: new Vector3(x - (idx * CARD_WIDTH / 2), y + (idx * 0.001), z) })
+            animCardStak.push({
+                mesh: card3d.cardMesh,
+                position: new Vector3(
+                    x - (idx * CARD_WIDTH / 2),
+                    y + (idx * 0.001),
+                    z)
+            })
         })
         await dealCard(animCardStak, scene)
     }
@@ -216,7 +226,13 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
                 const card3d = createCard(card.rank, card.suit, deckPosition)
                 const { x, y, z } = dealer3d.placePosition
                 dealer3d.cards.push({ cardMesh: card3d, card })
-                animCardStak.push({ mesh: card3d, position: new Vector3(x - (cardIdx * 0.03), y + (cardIdx * 0.001), z + (cardIdx * 0.09)) })
+                animCardStak.push({
+                    mesh: card3d,
+                    position: new Vector3(
+                        x - (cardIdx * 0.03),
+                        y + (cardIdx * 0.001),
+                        z + (cardIdx * 0.09))
+                })
             }
         })
         await dealCard(animCardStak, scene)
@@ -285,7 +301,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     }
 
     function createPlace(playerId: string, placeId: number, tablePlace: TablePlace, chips: Mesh[], scene: Scene) {
-        const place = MeshBuilder.CreateDisc('place', { radius: 0.07, tessellation: 64 })
+        const place = MeshBuilder.CreateDisc('place', { radius: PLACE_RADIUS, tessellation: 64 })
         const material = new StandardMaterial('place-ellipse-mat', scene)
         const texture = new Texture('./textures/ellipse.png', scene)
         material.opacityTexture = texture
@@ -385,23 +401,6 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         return cylinder
     }
 
-    // function createChips(value: number, hl: HighlightLayer, hlchipInHand: HighlightLayer, takeChip: (value: number) => void, scene: Scene): Mesh {
-    //     const cylinder = MeshBuilder.CreateCylinder('chips', { height: 0.01, diameterTop: 0.03, diameterBottom: 0.03 })
-    //     cylinder.actionManager = new ActionManager(scene)
-    //     cylinder.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnLeftPickTrigger, () => {
-    //         takeChip(value)
-    //         hlchipInHand.removeAllMeshes()
-    //         hlchipInHand.addMesh(cylinder, Color3.Blue())
-    //     }))
-    //     cylinder.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPointerOverTrigger, () => {
-    //         hl.addMesh(cylinder, Color3.Red())
-    //     }))
-    //     cylinder.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPointerOutTrigger, () => {
-    //         hl.removeMesh(cylinder)
-    //     }))
-    //     return cylinder
-    // }
-
     function createTable(scene: Scene): Mesh {
         const disc = MeshBuilder.CreateDisc("disc", { radius: 1, tessellation: 64 });
         const borderTable = MeshBuilder.CreateTorus('tableBorder', { diameter: 2, tessellation: 64, thickness: 0.1 })
@@ -416,8 +415,13 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         return disc;
     }
 
-    function CreateDeck(): Mesh {
-        const box = MeshBuilder.CreateBox('deck', { width: 0.1, height: 0.15, depth: 0.1 })
-        return box
+    function createDeck(): Mesh[] {
+        const cards = []
+        //TODO: do real deck cards
+        for (let i = 0; i < 52; i++) {
+            const { x, y, z } = deckPosition
+            cards.push(createCard("2", "Heart", new Vector3(x, y - (+`0.0${i}`), z)))
+        }
+        return cards
     }
 }
