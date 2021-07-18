@@ -52,13 +52,15 @@ export class PlayerHand {
         let aces = 0
         this.cards.forEach(
             card => {
-                if (card.rank === "A") aces += 1
+                if (card.rank === "A") {
+                    aces += 1
+                }
                 value += card.value
             }
         )
         for (let i = 0; i < aces; i++) {
             if (value > 21) {
-                value -= 10
+                value -= 9
             }
         }
         return value

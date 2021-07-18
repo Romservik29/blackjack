@@ -1,11 +1,12 @@
+
 import { PlayerHand } from './../PlayerHand';
 import { Card } from '../Card';
-import { Game } from './../game';
+import { Game, GameResult } from './../game';
 describe("game cycle", () => {
     describe("dealing with bet and sit player", () => {
         const game = new Game("andry", "Nikolay")
         game.addPlace(0)
-        game.setPlace(game.player.id, 0)
+        game.setPlace(0)
         const setedPlace = game.places.find((place) => place.playerID === game.player.id)
         game.player.chipInHand = 100;
         setedPlace?.addChipsToBet(100)
@@ -27,11 +28,12 @@ describe("game cycle", () => {
         describe('win', () => {
             const game = new Game("andry", "Nikolay")
             game.addPlace(0)
-            game.setPlace(game.player.id, 0)
-            const setedPlace = game.places.find((place) => place.playerID === game.player.id)
+            game.setPlace(0)
+            // @ts-ignore
+            const setedPlace = game.getPlace(0)
             game.player.chipInHand = 100;
-            game.addChipsToBet(game.player.id, 0)
-            const playerHand = new PlayerHand(setedPlace?.id!)
+            game.addChipsToBet(0)
+            const playerHand = new PlayerHand(setedPlace?.id, 0)
             setedPlace?.hands.push(playerHand)
             playerHand.cards = [new Card("Club", "10"), new Card("Diamond", "10")]
             game.dealer.hand.cards = [new Card("Club", "10"), new Card("Diamond", "5")]
@@ -43,11 +45,12 @@ describe("game cycle", () => {
         describe('lose', () => {
             const game = new Game("andry", "Nikolay")
             game.addPlace(0)
-            game.setPlace(game.player.id, 0)
-            const setedPlace = game.places.find((place) => place.playerID === game.player.id)
+            game.setPlace(0)
+            // @ts-ignore
+            const setedPlace = game.getPlace(0)
             game.player.chipInHand = 100;
-            game.addChipsToBet(game.player.id, 0)
-            const playerHand = new PlayerHand(setedPlace?.id!)
+            game.addChipsToBet(0)
+            const playerHand = new PlayerHand(setedPlace?.id, 0)
             setedPlace?.hands.push(playerHand)
             playerHand.cards = [new Card("Club", "10"), new Card("Diamond", "5")]
             game.dealer.hand.cards = [new Card("Spade", "10"), new Card("Heart", "10")]
@@ -59,11 +62,12 @@ describe("game cycle", () => {
         describe('tie', () => {
             const game = new Game("andry", "Nikolay")
             game.addPlace(0)
-            game.setPlace(game.player.id, 0)
-            const setedPlace = game.places.find((place) => place.playerID === game.player.id)
+            game.setPlace(0)
+            // @ts-ignore
+            const setedPlace = game.getPlace(0)
             game.player.chipInHand = 100;
-            game.addChipsToBet(game.player.id, 0)
-            const playerHand = new PlayerHand(setedPlace?.id!)
+            game.addChipsToBet(0)
+            const playerHand = new PlayerHand(setedPlace?.id, 0)
             setedPlace?.hands.push(playerHand)
             playerHand.cards = [new Card("Club", "10"), new Card("Diamond", "10")]
             game.dealer.hand.cards = [new Card("Heart", "10"), new Card("Spade", "10")]
@@ -78,15 +82,30 @@ describe("game cycle", () => {
         describe('getPlayersResult', () => {
             it('result equal win', () => {
                 const game = new Game("1", "2", 5)
-                expect(game.getHandResult(10, 5)).toBe("win")
+                const hand = new PlayerHand(-1, -1)
+                hand.cards = [new Card("Diamond", "5"), new Card("Heart", "5")]
+                game.dealer.hand = hand
+                const playerHand = new PlayerHand(0, 0)
+                playerHand.cards = [new Card("Diamond", "5"), new Card("Heart", "10")]
+                expect(game.getHandResult(playerHand)).toBe(GameResult.WIN)
             })
             it('result equal lose', () => {
                 const game = new Game("1", "2", 5)
-                expect(game.getHandResult(5, 10)).toBe("lose")
+                const hand = new PlayerHand(-1, -1)
+                hand.cards = [new Card("Diamond", "10"), new Card("Heart", "5")]
+                game.dealer.hand = hand
+                const playerHand = new PlayerHand(0, 0)
+                playerHand.cards = [new Card("Diamond", "5"), new Card("Heart", "5")]
+                expect(game.getHandResult(playerHand)).toBe(GameResult.LOSE)
             })
             it('result equal tie', () => {
                 const game = new Game("1", "2", 5)
-                expect(game.getHandResult(10, 10)).toBe("tie")
+                const hand = new PlayerHand(-1, -1)
+                hand.cards = [new Card("Diamond", "5"), new Card("Heart", "5")]
+                game.dealer.hand = hand
+                const playerHand = new PlayerHand(0, 0)
+                playerHand.cards = [new Card("Diamond", "5"), new Card("Heart", "5")]
+                expect(game.getHandResult(playerHand)).toBe(GameResult.TIE)
             })
         })
     })

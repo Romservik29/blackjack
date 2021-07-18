@@ -12,7 +12,7 @@ export enum GameStatus {
     CALC_FINAL_RESULT, // before all player stand culculate final result
     CLEAR_CARDS,
 }
-enum GameResult {
+export enum GameResult {
     BLACKJACK,
     WIN,
     TIE,
