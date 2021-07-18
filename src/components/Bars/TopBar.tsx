@@ -17,7 +17,6 @@ background-color: #00800022;
 export default function TopBar() {
     return (
         <TopBarContainer>
-            <Button>Deal</Button>
             <GameStageInfo />
         </TopBarContainer>
     )

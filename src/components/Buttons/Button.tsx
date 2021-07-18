@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { Color } from '../../color'
 type ButtonProps = {
     children?: React.ReactNode
-    onClick?: Function
+    onClick: Function
 }
 
 const StyledButton = styled.div`
@@ -12,11 +12,12 @@ border-radius: 7px;
 color: white;
 background-color: #00000096;
 padding: 5px 10px 5px 10px;
+cursor: pointer;
 `
 
 export default function Button(props: ButtonProps) {
     function onClick() {
-        props ?? onClick()
+        props.onClick()
     }
     return (
         <StyledButton onClick={onClick}>

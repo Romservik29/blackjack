@@ -86,8 +86,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         async status => {
             switch (status) {
                 case GameStatus.DEALING: {
-                    await deal()
-                    game.status = GameStatus.PLAYING_PLAYERS
+                    deal()
                     break;
                 }
                 case GameStatus.PLAYING_PLAYERS: {
@@ -154,7 +153,6 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         scene.render()
     })
     async function deal() {
-        await game.deal()
         const hand3d: { mesh: Mesh, position: Vector3 }[][] = []
         game.places.forEach((place, placeIdx) => {
             place.hands.forEach((hand, handIdx) => {
@@ -199,6 +197,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
             })
         })
         await dealCard(animCardStak, scene)
+        game.status = GameStatus.PLAYING_PLAYERS
     }
     async function playDealer() {
         while (game.dealer.hand.score < 17) {

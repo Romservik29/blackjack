@@ -1,9 +1,10 @@
 import { PlayerHand } from './PlayerHand';
 import { TablePlace } from './TablePlace';
-import { computed, makeAutoObservable, makeObservable, observable } from 'mobx';
+import { computed, makeAutoObservable, makeObservable, observable, when, reaction } from 'mobx';
 import { Dealer } from './Dealer';
 import { Deck } from './Deck';
 import { Player } from './Player';
+import HandScore from '../components/HandScore';
 export enum GameStatus {
     WAITING_BETS, //waiting while player bet
     DEALING, // dealing cards all players and dealer
@@ -32,13 +33,29 @@ export class Game {
     status: GameStatus;
     players: Array<Player> = [];
     places: Array<TablePlace> = [];
+    interval: number | null;
+    timer: number;
     constructor(dealerName: string, playerID: string, chips = 5000, deck = new Deck()) {
         this.player = new Player(playerID, chips)
         this.players.push(this.player)
         this.dealer = new Dealer(dealerName)
         this.deck = deck
+        this.interval = null
+        this.timer = 0
         this.status = GameStatus.WAITING_BETS
+        this.setTimer(10)
         makeAutoObservable(this)
+        reaction(
+            () => this.timer,
+            timer => {
+                if (this.timer < 0 && this.status === GameStatus.WAITING_BETS)
+                    if (this.hasBet) {
+                        this.deal()
+                    } else {
+                        this.setTimer(10)
+                    }
+            }
+        )
     }
     get allHandScors(): Score[] {
         const scores: Score[] = []
@@ -65,19 +82,26 @@ export class Game {
                 return "Place your bets"
             }
             case GameStatus.DEALING: {
-                return "Deaing cards"
-            }
-            case GameStatus.PLAYING_PLAYERS: {
-                return "Players playing"
-            }
-            case GameStatus.PLAYING_DEALER: {
-                return "Dealer playing"
+                return "Dealing cards"
             }
             case GameStatus.CALC_FINAL_RESULT: {
                 return "Getting payments"
             }
             default: return ""
         }
+    }
+    setTimer(time: number): void {
+        if (this.interval) {
+            clearInterval(this.interval)
+        }
+        this.timer = time
+        this.interval = window.setInterval(() => {
+            this.timer -= 1
+            if (this.timer < 0) {
+                clearInterval(this.interval!)
+            }
+        }, 1000)
+
     }
     private getPlace(placeId: number): TablePlace {
         const place = this.places.find((place) => place.id === placeId)
@@ -145,10 +169,11 @@ export class Game {
         newDeck.shuffle()
         this.deck = newDeck
     }
-    hasBet(): boolean {
+    get hasBet(): boolean {
         return this.places.some((place) => place.bet > 0)
     }
     deal(): void {
+        this.status = GameStatus.DEALING
         this.places.forEach(place => {
             if (place.playerID !== null && place.bet > 0) {
                 const hand = new PlayerHand(place.id, place.hands.length)
@@ -159,7 +184,14 @@ export class Game {
         this.dealer.hand.cards = [this.deck.takeCard(), this.deck.takeCard()]
     }
     playDealer(maxValue: number): void {
-        while (this.dealer.hand.score < maxValue) {
+        const dealerScore = this.dealer.hand.score
+        let maxScore = 0
+        this.handsHasBet.forEach(hand => {
+            if (maxScore < hand.score) {
+                maxScore = hand.score
+            }
+        })
+        while (dealerScore < maxValue && dealerScore < maxScore) {
             this.dealer.hand.takeCard(this.deck.takeCard())
         }
     }
