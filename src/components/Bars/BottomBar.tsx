@@ -1,8 +1,7 @@
 import styled from "styled-components"
-import { GameStatus } from "../app/game"
-import { useStore } from "../store"
-import Chips from './Chips'
-import PlayerChips from './PlayerBalance'
+import { GameStatus } from "../../app/game"
+import { useStore } from "../../store"
+import PlayerChips from '../PlayerBalance'
 
 const BottomBarContainer = styled.div`
 display: flex;
@@ -38,17 +37,11 @@ export default function BottomBar() {
         <BottomBarContainer>
             <LeftBar>
                 <div>
-                    <PlayerChips />
+                    
                 </div>
             </LeftBar>
-            {status === GameStatus.WAITING_BETS
-                && <CenterBar>
-                    <Chips />
-                </CenterBar>
-            }
-            <RightBar>
-
-            </RightBar>
+            <CenterBar />
+            <RightBar />
         </BottomBarContainer>
     )
 }

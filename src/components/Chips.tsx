@@ -4,14 +4,14 @@ import Chip from './Chip'
 const ChipsContainer = styled.div`
 display: flex;
 justify-content: space-evenly;
-width: 60%;
-height: 80%;
+width: 30%;
+height: 60%;
 `
 
 export default function Chips() {
     return (
         <ChipsContainer>
-            {[100, 250, 500, 1000].map((value) => <Chip value={value} />)}
+            {[25,50,100, 250, 500, 1000].map((value) => <Chip value={value} />)}
         </ChipsContainer>
     )
 }

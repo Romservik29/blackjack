@@ -3,13 +3,12 @@ import "./App.css";
 import { createRoom } from "./blackjack"
 import { useStore } from './store'
 import { observer } from "mobx-react-lite";
-import TopBar from "./components/TopBar";
-import BottomBar from "./components/BottomBar";
-import GameButtons from "./components/GameButtons";
+import TopBar from "./components/Bars/TopBar";
+import MiddleBar from "./components/Bars/MiddleBar";
+import PlayerBalance from "./components/PlayerBalance";
 import DealerScore from "./components/DealerScore"
-import { toJS } from "mobx";
-import Score from "./components/Score";
 import ScoreItems from "./components/ScoreItems";
+import GameButtons from './components/Buttons/GameButtons'
 
 export default observer((): JSX.Element => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -56,7 +55,8 @@ export default observer((): JSX.Element => {
           <ScoreItems />
           {gameStore.handsHasBet.map((hand) => <GameButtons placeId={hand.placeId} handIdx={hand.idx} />)}
           <TopBar />
-          <BottomBar />
+          <MiddleBar />
+          <PlayerBalance />
         </div>
       </div>
     </div>

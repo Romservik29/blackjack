@@ -1,5 +1,6 @@
 import styled from "styled-components"
-import GameStageInfo from "./GameStageInfo"
+import Button from "../Buttons/Button"
+import GameStageInfo from "../GameStageInfo"
 
 const TopBarContainer = styled.div`
 display: flex;
@@ -16,6 +17,7 @@ background-color: #00800022;
 export default function TopBar() {
     return (
         <TopBarContainer>
+            <Button>Deal</Button>
             <GameStageInfo />
         </TopBarContainer>
     )
