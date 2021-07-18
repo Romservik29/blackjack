@@ -82,23 +82,9 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     }
     const deck = createDeck()
     reaction(
-        () => game.hasBet(),
-        hasBet => {
-            if (hasBet && game.status === GameStatus.WAITING_BETS) {
-                const timer = setTimeout(() => {
-                    game.status = GameStatus.DEALING
-                    clearTimeout(timer)
-                }, 5000)
-            }
-        }
-    )
-    reaction(
         () => game.status,
         async status => {
             switch (status) {
-                case GameStatus.WAITING_BETS: {
-                    break;
-                }
                 case GameStatus.DEALING: {
                     await deal()
                     game.status = GameStatus.PLAYING_PLAYERS
@@ -157,6 +143,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
                     clearTable()
                     game.clearTable()
                     game.status = GameStatus.WAITING_BETS
+                    game.setTimer(10)
                     break;
                 }
                 default: return
@@ -342,12 +329,13 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         const text = "seat"
         var font = "128px monospace";
         const nameMat = new StandardMaterial("nameMat", scene);
-        nameMat.diffuseTexture = textureName
+        nameMat.emissiveTexture = textureName
+        nameMat.disableLighting = true
         nameMat.diffuseColor = Color3.FromHexString(Color.green)
         namePlane.material = nameMat
         textureName.drawText(text, null, null, font, "black", Color.green, true)
-        namePlane.actionManager = new ActionManager(scene)
-        namePlane.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
+        place.actionManager = new ActionManager(scene)
+        place.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
             if (tablePlace.playerID) {
                 const { player } = game
                 if (player.chipInHand && game.status === GameStatus.WAITING_BETS) {
