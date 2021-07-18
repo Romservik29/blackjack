@@ -39,12 +39,6 @@ export class Game {
         this.deck = deck
         this.status = GameStatus.WAITING_BETS
         makeAutoObservable(this)
-        // makeObservable(this, {
-        //     players: observable,
-        //     places: observable,
-        //     status: observable,
-        //     isAllStand: computed
-        // })
     }
     get allHandScors(): Score[] {
         const scores: Score[] = []
