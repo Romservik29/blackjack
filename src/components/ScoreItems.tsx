@@ -1,5 +1,6 @@
 import { observer } from "mobx-react-lite"
 import { useStore } from "../store"
+import DealerScore from "./DealerScore"
 import Score from './Score'
 
 export default observer(() => {
@@ -7,8 +8,13 @@ export default observer(() => {
     const { allHandScors } = gameStore
     return (
         <>
-            {allHandScors.map((score) =>
-                scoreTopLeft(score.value, score.placeIdx, score.handIdx))}
+            {gameStore.status > 1
+                &&
+                allHandScors.map((score) =>
+                    scoreTopLeft(score.value, score.placeIdx, score.handIdx))
+                &&
+                <DealerScore />
+            }
         </>
     )
 })

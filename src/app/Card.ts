@@ -11,7 +11,7 @@ export class Card {
     }
     private getValue(rank: AnyRank): number {
         if (rank === "A") {
-            return 10;
+            return 11;
         } else if (rank === "J" || rank === "Q" || rank === "K") {
             return 10;
         } else {

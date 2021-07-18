@@ -1,13 +1,12 @@
-import { useCallback, useLayoutEffect, useRef } from "react";
+import { useCallback, useLayoutEffect, useRef } from 'react';
 import "./App.css";
-import { createRoom } from "./blackjack"
+import { createRoom } from './blackjack'
 import { useStore } from './store'
-import { observer } from "mobx-react-lite";
-import MiddleBar from "./components/Bars/MiddleBar";
-import PlayerBalance from "./components/PlayerBalance";
-import DealerScore from "./components/DealerScore"
-import ScoreItems from "./components/ScoreItems";
-import GameButtons from './components/Buttons/GameButtons'
+import { observer } from 'mobx-react-lite';
+import MiddleBar from './components/Bars/MiddleBar';
+import PlayerBalance from './components/PlayerBalance';
+import ScoreItems from './components/ScoreItems';
+import Players from './components/Players'
 
 export default observer((): JSX.Element => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -50,9 +49,8 @@ export default observer((): JSX.Element => {
       <div style={{ position: "relative" }}>
         <canvas ref={canvasRef} style={{ position: "absolute", zIndex: 1 }}></canvas>
         <div id="canvas_2d" ref={divRef} style={{ position: "absolute" }}>
-          <DealerScore />
           <ScoreItems />
-          {gameStore.handsHasBet.map((hand) => <GameButtons placeId={hand.placeId} handIdx={hand.idx} />)}
+          <Players />
           <MiddleBar />
           <PlayerBalance />
         </div>
