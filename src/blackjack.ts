@@ -112,9 +112,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
                                     const hand3d = places3d[placeIdx].hands[handIdx]
                                     if (hand.cards.length !== hand3d.cards.length) {
                                         hand.cards.forEach((card, cardIdx) => {
-                                            console.log(card)
                                             if (hand3d.cards[cardIdx] === undefined) {
-                                                console.log(hand3d.cards[cardIdx])
                                                 const card3d: Card3d = { cardMesh: createCard(card.rank, card.suit, deckPosition), card }
                                                 const place3d = places3d[placeIdx]
                                                 place3d.hands[handIdx].cards.push(card3d)
@@ -137,7 +135,6 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
                     reaction(
                         () => game.isAllStand,
                         isAllStand => {
-                            console.log(isAllStand)
                             if (isAllStand) {
                                 playing()
                                 game.status = GameStatus.PLAYING_DEALER
@@ -172,11 +169,9 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     async function deal() {
         await game.deal()
         const hand3d: { mesh: Mesh, position: Vector3 }[][] = []
-        console.log(places3d)
         game.places.forEach((place, placeIdx) => {
             place.hands.forEach((hand, handIdx) => {
                 if (places3d[placeIdx].hands[handIdx] === undefined) {
-                    console.log(placeIdx, handIdx)
                     const cards: Card3d[] = []
                     hand.cards.forEach((card) => {
                         const card3d: Card3d = { cardMesh: createCard(card.rank, card.suit, deckPosition), card }
@@ -264,7 +259,6 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         animCardStak.length = 0
     }
     async function createAnimationCard(card: Mesh, position: Vector3, scene: Scene) {
-        console.log(card, position)
         const moveAnimation = new Animation("card-move-animation", "position", FRAME_RATE, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
         const moveFrames = [];
         moveFrames.push({
@@ -377,18 +371,19 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         const texture = new Texture(`./textures/cards/cards.png`, scene);
         let row: number =
             suit === "Spade"
-                ? 0
-                : suit === "Diamond"
-                    ? 1
-                    : suit === "Heart"
-                        ? 2
-                        : 3
+                ? 1
+                : suit === "Heart"
+                    ? 2
+                    : suit === "Diamond"
+                        ? 3
+                        : 4
         let column: number =
             rank === "J"
-                ? 11
-                : rank === "Q" ? 12
-                    : rank === "K" ? 13
-                        : rank === "A" ? 0
+                ? 10
+                : rank === "Q" ? 11
+                    : rank === "K" ? 12
+                        : rank === "A"
+                            ? 0
                             : +rank - 1;
 
 
