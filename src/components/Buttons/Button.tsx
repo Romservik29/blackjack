@@ -15,7 +15,7 @@ padding: 5px 10px 5px 10px;
 cursor: pointer;
 `
 
-export default function Button(props: ButtonProps) {
+export default function Button(props: ButtonProps): JSX.Element {
     function onClick() {
         props.onClick()
     }

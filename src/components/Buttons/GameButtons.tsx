@@ -29,6 +29,8 @@ background-color: ${(props: { bgColor: string }) => props.bgColor};
 `
 export default observer(({ placeId, handIdx }: GameButtonsProps) => {
     const gameStore = useStore("Game")
+    const place = gameStore.getPlace(placeId)
+    const disabled = place.hands.some((hand) => hand.isStand === false)
     function hit() {
         gameStore.hit(placeId, handIdx)
     }

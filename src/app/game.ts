@@ -103,7 +103,7 @@ export class Game {
         }, 1000)
 
     }
-    private getPlace(placeId: number): TablePlace {
+    getPlace(placeId: number): TablePlace {
         const place = this.places.find((place) => place.id === placeId)
         if (place) {
             return place

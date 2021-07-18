@@ -3,7 +3,6 @@ import "./App.css";
 import { createRoom } from "./blackjack"
 import { useStore } from './store'
 import { observer } from "mobx-react-lite";
-import TopBar from "./components/Bars/TopBar";
 import MiddleBar from "./components/Bars/MiddleBar";
 import PlayerBalance from "./components/PlayerBalance";
 import DealerScore from "./components/DealerScore"
@@ -54,7 +53,6 @@ export default observer((): JSX.Element => {
           <DealerScore />
           <ScoreItems />
           {gameStore.handsHasBet.map((hand) => <GameButtons placeId={hand.placeId} handIdx={hand.idx} />)}
-          <TopBar />
           <MiddleBar />
           <PlayerBalance />
         </div>
