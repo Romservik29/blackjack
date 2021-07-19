@@ -49,7 +49,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     const scene = new Scene(engine)
     new ArcRotateCamera('camera', Math.PI / 2, Math.PI / 8, 1.9, new Vector3(0, 0.7, 0), scene)
 
-    var light = new HemisphericLight("light", new Vector3(0, 1, 0), scene);
+    const light = new HemisphericLight("light", new Vector3(0, 1, 0), scene);
     light.intensity = 1;
 
     createFloor(scene)
@@ -323,11 +323,9 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         namePlane.parent = place
         namePlane.position.y += 0.001
         namePlane.rotation.z = Math.PI
-        var DTWidth = 256;
-        var DTHeight = 256;
-        const textureName = new DynamicTexture('name-texture', { width: DTWidth, height: DTHeight }, scene, true);
+        const textureName = new DynamicTexture('name-texture', { width: 512, height: 256 }, scene, true);
         const text = "seat"
-        var font = "128px monospace";
+        const font = "128px monospace";
         const nameMat = new StandardMaterial("nameMat", scene);
         nameMat.emissiveTexture = textureName
         nameMat.disableLighting = true
