@@ -1,5 +1,5 @@
 # Demo
-[👉Click here👈](https://master.d2e1j38ht9e0pd.amplifyapp.com/)
+[👉Click here👈](old-blackjack.surge.sh)
 
 # Getting Started with Create React App
 
