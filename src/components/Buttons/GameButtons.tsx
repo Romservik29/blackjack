@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react-lite'
 import { useStore } from '../../store'
 import styled from 'styled-components'
+import { useState } from 'react'
 
 type GameButtonsProps = {
     placeId: number,
@@ -37,12 +38,20 @@ export default observer(({ placeId, handIdx }: GameButtonsProps) => {
     function stand() {
         gameStore.stand(placeId, handIdx)
     }
+    const isStand = gameStore.getPlace(placeId).hands[handIdx].isStandOrOver
     return (
         <GameButtonsContainer>
-            <Button bgColor="orange" onClick={double} children="2x" />
-            <Button bgColor="green" onClick={hit} children="+" />
-            <Button bgColor="red" onClick={stand} children="౼" />
-            <Button bgColor="teal" onClick={split} children="<>" />
+
+            {isStand
+                ? <Button bgColor="red" onClick={stand} children="౼" />
+                : <><Button bgColor="orange" onClick={double} children="2x" />
+                    <Button bgColor="green" onClick={hit} children="+" />
+                    <Button bgColor="red" onClick={stand} children="౼" />
+                    <Button bgColor="teal" onClick={split} children="<>" />
+                </>
+            }
+
+
         </GameButtonsContainer>
     )
 })
