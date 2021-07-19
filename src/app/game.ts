@@ -192,26 +192,10 @@ export class Game {
         }
         throw new Error("player not found")
     }
-
-    getHandResult(playerHand: PlayerHand): GameResult {
-        const dealerHand = this.dealer.hand
-        if (playerHand.score === 21 && dealerHand.score !== 21) {
-            if (playerHand.cards.length === 2) {
-                return GameResult.BLACKJACK
-            } else {
-                return GameResult.WIN
-            }
-        } else if (playerHand.score === this.dealer.hand.score) {
-            return GameResult.TIE
-        } else if (playerHand.score > this.dealer.hand.score && playerHand.score < 22) {
-            return GameResult.WIN
-        }
-        return GameResult.LOSE
-    }
     calcFinalResult(): void {
         const hands = this.handsHasBet
         hands.forEach((hand) => {
-            const result = this.getHandResult(hand)
+            const result = hand.result(this.dealer.hand)
             const place = this.getPlace(hand.placeId)
             switch (result) {
                 case GameResult.BLACKJACK: {
