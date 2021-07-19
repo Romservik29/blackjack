@@ -27,12 +27,12 @@ left: 3em;
 const StyledResult = styled.div`
 position: absolute;
 top: -5em;
-left: 2em;
+left: 1.4em;
 `
 
 export default observer(({ playerHand, dealerHand, gameStatus }: PlayerProps) => {
     const top = 80 + (playerHand.placeId % 2 === 0 ? 0 : 6)
-    const left = 22 + (playerHand.placeId * 22)
+    const left = 22 + (playerHand.placeId * 20)
     return (
         <Styled top={top} left={left}>
             <StyledScore>
