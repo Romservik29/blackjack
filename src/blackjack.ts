@@ -129,6 +129,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
                     break
                 }
                 case GameStatus.PLAYING_DEALER: {
+                    game.playDealer(17)
                     await playDealer()
                     game.setStatus(GameStatus.CALC_FINAL_RESULT)
                     break;
@@ -202,9 +203,6 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         game.setStatus(GameStatus.PLAYING_PLAYERS)
     }
     async function playDealer() {
-        while (game.dealer.hand.score < 17) {
-            game.dealer.hand.takeCard(game.deck.takeCard())
-        }
         game.dealer.hand.cards.forEach((card, cardIdx) => {
             if (dealer3d.cards[cardIdx] === undefined) {
                 const card3d = createCard(card.rank, card.suit, deckPosition)

@@ -38,7 +38,7 @@ export default observer(() => {
         gameStore.status === GameStatus.WAITING_BETS
             ? <StyledMiddleBar>
                 <Container>
-                    <div style={{ fontSize: "3em", color: "white", padding: 5}}>Place your bets</div>
+                    <div style={{ fontSize: "3em", color: "white", padding: 5 }}>Place your bets</div>
                     < Chips />
                     <Timer>{gameStore.timer}</Timer>
                     {gameStore.hasBet &&

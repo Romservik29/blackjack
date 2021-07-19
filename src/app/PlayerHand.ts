@@ -1,3 +1,4 @@
+import { GameResult } from './game';
 import { makeAutoObservable, when } from 'mobx';
 import { Card } from './Card';
 
@@ -15,11 +16,28 @@ export class PlayerHand {
             () => this.stand()
         )
     }
+    result(hand: PlayerHand): GameResult {
+        if (this.score < 22 && this.score === hand.score) {
+            return GameResult.TIE
+        } else if (this.score < hand.score && hand.score < 22) {
+            return GameResult.LOSE
+        } else if (this.isBlackJack()) {
+            return GameResult.BLACKJACK
+        } else if (this.score > 21) {
+            return GameResult.LOSE
+        } else {
+            return GameResult.WIN
+        }
+
+    }
     get isStandOrOver(): boolean {
         if (this.score > 21) {
             return true
         }
         return this.isStand
+    }
+    isBlackJack(): boolean {
+        return this.cards.length === 2 && this.score === 21
     }
     takeCard(card: Card): void {
         this.cards.push(card)

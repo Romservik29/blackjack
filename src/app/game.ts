@@ -1,6 +1,6 @@
 import { PlayerHand } from './PlayerHand';
 import { TablePlace } from './TablePlace';
-import { makeAutoObservable, reaction } from 'mobx';
+import { makeAutoObservable, reaction, toJS } from 'mobx';
 import { Dealer } from './Dealer';
 import { Deck } from './Deck';
 import { Player } from './Player';
@@ -171,16 +171,16 @@ export class Game {
             }
         })
         this.dealer.hand.cards = [this.deck.takeCard(), this.deck.takeCard()]
+        console.log(toJS(this.places))
     }
     playDealer(maxValue: number): void {
-        const dealerScore = this.dealer.hand.score
         let maxScore = 0
         this.handsHasBet.forEach(hand => {
             if (maxScore < hand.score) {
                 maxScore = hand.score
             }
         })
-        while (dealerScore < maxValue && dealerScore < maxScore) {
+        while (this.dealer.hand.score < maxValue && this.dealer.hand.score <= maxScore) {
             this.dealer.hand.takeCard(this.deck.takeCard())
         }
     }

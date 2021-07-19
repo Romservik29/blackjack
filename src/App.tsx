@@ -5,9 +5,9 @@ import { useStore } from './store'
 import { observer } from 'mobx-react-lite';
 import MiddleBar from './components/Bars/MiddleBar';
 import PlayerBalance from './components/PlayerBalance';
-import ScoreItems from './components/ScoreItems';
-import Players from './components/Players'
+import PlayerPlaces from './components/PlayerPlaces'
 import styled from 'styled-components';
+import DealerScore from './components/DealerScore';
 
 const Container = styled.div`
 position: relative;
@@ -56,8 +56,8 @@ export default observer((): JSX.Element => {
       <Container>
         <canvas ref={canvasRef} style={{ position: "absolute", zIndex: 1 }}></canvas>
         <div id="canvas_2d" ref={divRef} style={{ position: "absolute" }}>
-          <ScoreItems />
-          <Players />
+          <DealerScore />
+          <PlayerPlaces />
           <MiddleBar />
           <PlayerBalance />
         </div>

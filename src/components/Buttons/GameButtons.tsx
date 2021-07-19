@@ -9,10 +9,6 @@ type GameButtonsProps = {
 
 const GameButtonsContainer = styled.div`
     display: flex;
-    position: absolute;
-    top: ${(props: { top: number, left: number }) => props.top + "%"};
-    left: ${(props: { top: number, left: number }) => props.left + "%"};
-    z-index: 3;
 `
 const Button = styled.div`
 font-size: 1em;
@@ -41,10 +37,8 @@ export default observer(({ placeId, handIdx }: GameButtonsProps) => {
     function stand() {
         gameStore.stand(placeId, handIdx)
     }
-    const top = 79 + (placeId % 2 === 0 ? 0 : 6)
-    const left = 20 + (placeId * 22)
     return (
-        <GameButtonsContainer left={left} top={top}>
+        <GameButtonsContainer>
             <Button bgColor="orange" onClick={double} children="2x" />
             <Button bgColor="green" onClick={hit} children="+" />
             <Button bgColor="red" onClick={stand} children="౼" />

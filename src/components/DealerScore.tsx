@@ -1,11 +1,13 @@
 import { observer } from 'mobx-react-lite'
 import { useStore } from '../store'
-import Score from './Score'
+import { ScoreContainer } from './Score'
 
 export default observer(() => {
     const storeGame = useStore("Game")
     const { score } = storeGame.dealer.hand
     return (
-        <Score value={score} top={"35%"} left={"50%"} />
+        <ScoreContainer style={{ position: 'absolute', left: "50%", top: "35%", zIndex: 3 }}>
+            {score}
+        </ScoreContainer>
     )
 })

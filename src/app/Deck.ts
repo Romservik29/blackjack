@@ -33,8 +33,9 @@ export class Deck {
     takeCard(): Card {
         if (this.deck.length > 0) {
             return this.deck.shift()!
+        } else {
+            this.createDeck()
+            return this.deck.shift()!
         }
-        this.createDeck()
-        return this.deck.shift()!
     }
 }
