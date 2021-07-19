@@ -12,7 +12,7 @@ export default observer(({ value }: ChipProps) => {
         gameStore.player.setChipInHand(value)
     }
     const { chipInHand } = gameStore.player
-    const chipColor: string = value > 999 ? "blue" : value > 499 ? "yellow" : value > 249 ? "green" : "red"
+    const chipColor: string = value > 999 ? "blue" : value > 499 ? "yellow" : value > 249 ? "green" : value > 99 ? "grey" : value > 49 ? "pink" : "red"
 
     return (
         <svg style={{ cursor: "pointer" }} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" onClick={onClick}>
@@ -32,7 +32,6 @@ export default observer(({ value }: ChipProps) => {
                 stroke-width="8"
                 stroke-dasharray="15 14"
                 style={{ transform: "rotate(17deg)", transformOrigin: "center" }}
-
             />
             <circle
                 opacity={chipInHand === value ? 0.5 : 0}

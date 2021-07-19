@@ -47,7 +47,6 @@ export default observer(() => {
                         </Button>
                     }
                 </Container>
-
             </StyledMiddleBar>
             : null
     )
