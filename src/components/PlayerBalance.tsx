@@ -5,6 +5,10 @@ import { Color } from '../color'
 import { useStore } from '../store'
 
 const BalanceContainer = styled.div`
+position: absolute;
+z-index: 3;
+bottom: 10px;
+left: 10px;
 display: flex;
 flex-direction: column;
 justify-content: center;

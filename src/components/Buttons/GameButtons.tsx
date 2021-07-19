@@ -10,8 +10,8 @@ type GameButtonsProps = {
 const GameButtonsContainer = styled.div`
     display: flex;
     position: absolute;
-    top: 70%;
-    left: ${(props: { left: number }) => props.left + "%"};
+    top: ${(props: { top: number, left: number }) => props.top + "%"};
+    left: ${(props: { top: number, left: number }) => props.left + "%"};
     z-index: 3;
 `
 const Button = styled.div`
@@ -29,8 +29,6 @@ background-color: ${(props: { bgColor: string }) => props.bgColor};
 `
 export default observer(({ placeId, handIdx }: GameButtonsProps) => {
     const gameStore = useStore("Game")
-    const place = gameStore.getPlace(placeId)
-    const disabled = place.hands.some((hand) => hand.isStand === false)
     function hit() {
         gameStore.hit(placeId, handIdx)
     }
@@ -43,9 +41,10 @@ export default observer(({ placeId, handIdx }: GameButtonsProps) => {
     function stand() {
         gameStore.stand(placeId, handIdx)
     }
-    const left = 14 + (placeId * 30)
+    const top = 79 + (placeId % 2 === 0 ? 0 : 6)
+    const left = 20 + (placeId * 22)
     return (
-        <GameButtonsContainer left={left}>
+        <GameButtonsContainer left={left} top={top}>
             <Button bgColor="orange" onClick={double} children="2x" />
             <Button bgColor="green" onClick={hit} children="+" />
             <Button bgColor="red" onClick={stand} children="౼" />

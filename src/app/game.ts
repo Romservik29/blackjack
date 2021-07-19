@@ -1,10 +1,9 @@
 import { PlayerHand } from './PlayerHand';
 import { TablePlace } from './TablePlace';
-import { computed, makeAutoObservable, makeObservable, observable, when, reaction } from 'mobx';
+import { makeAutoObservable, reaction } from 'mobx';
 import { Dealer } from './Dealer';
 import { Deck } from './Deck';
 import { Player } from './Player';
-import HandScore from '../components/HandScore';
 export enum GameStatus {
     WAITING_BETS, //waiting while player bet
     DEALING, // dealing cards all players and dealer
@@ -76,32 +75,20 @@ export class Game {
         })
         return hands
     }
-    get gameStageInfo(): string {
-        switch (this.status) {
-            case GameStatus.WAITING_BETS: {
-                return "Place your bets"
-            }
-            case GameStatus.DEALING: {
-                return "Dealing cards"
-            }
-            case GameStatus.CALC_FINAL_RESULT: {
-                return "Getting payments"
-            }
-            default: return ""
-        }
-    }
     setTimer(time: number): void {
         if (this.interval) {
             clearInterval(this.interval)
         }
         this.timer = time
         this.interval = window.setInterval(() => {
-            this.timer -= 1
+            this.setTimer(this.timer - 1)
             if (this.timer < 0) {
                 clearInterval(this.interval!)
             }
         }, 1000)
-
+    }
+    setStatus(status: GameStatus) {
+        this.status = status
     }
     getPlace(placeId: number): TablePlace {
         const place = this.places.find((place) => place.id === placeId)
@@ -150,7 +137,9 @@ export class Game {
         if (hand.isStandOrOver) {
             return
         }
-        place.hands.push(hand.split(handIdx))
+        if (hand.isSplitable()) {
+            place.hands.push(hand.split(handIdx))
+        }
     }
     stand(placeId: number, handIdx: number): void {
         const place = this.getPlace(placeId)
@@ -206,11 +195,11 @@ export class Game {
 
     getHandResult(playerHand: PlayerHand): GameResult {
         const dealerHand = this.dealer.hand
-        if (playerHand.score === 21 && dealerHand.score === 21) {
-            if (playerHand.cards.length === 2 && dealerHand.cards.length === 2) {
+        if (playerHand.score === 21 && dealerHand.score !== 21) {
+            if (playerHand.cards.length === 2) {
                 return GameResult.BLACKJACK
             } else {
-                return GameResult.TIE
+                return GameResult.WIN
             }
         } else if (playerHand.score === this.dealer.hand.score) {
             return GameResult.TIE

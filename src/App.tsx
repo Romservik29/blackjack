@@ -7,6 +7,13 @@ import MiddleBar from './components/Bars/MiddleBar';
 import PlayerBalance from './components/PlayerBalance';
 import ScoreItems from './components/ScoreItems';
 import Players from './components/Players'
+import styled from 'styled-components';
+
+const Container = styled.div`
+position: relative;
+display: flex;
+justify-content: center;
+`
 
 export default observer((): JSX.Element => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -46,7 +53,7 @@ export default observer((): JSX.Element => {
 
   return (
     <div>
-      <div style={{ position: "relative" }}>
+      <Container>
         <canvas ref={canvasRef} style={{ position: "absolute", zIndex: 1 }}></canvas>
         <div id="canvas_2d" ref={divRef} style={{ position: "absolute" }}>
           <ScoreItems />
@@ -54,7 +61,7 @@ export default observer((): JSX.Element => {
           <MiddleBar />
           <PlayerBalance />
         </div>
-      </div>
+      </Container>
     </div>
   );
 }

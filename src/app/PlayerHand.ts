@@ -60,7 +60,7 @@ export class PlayerHand {
         )
         for (let i = 0; i < aces; i++) {
             if (value > 21) {
-                value -= 9
+                value -= 10
             }
         }
         return value

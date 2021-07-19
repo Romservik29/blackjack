@@ -12,11 +12,8 @@ import {
     Color3,
     Mesh,
     DynamicTexture,
-    FreeCamera,
-    UniversalCamera,
     ExecuteCodeAction,
     ActionManager,
-    HighlightLayer,
     Vector4,
     Animation,
     HemisphericLight,
@@ -41,46 +38,49 @@ interface AnimationCard {
     mesh: Mesh
     position: Vector3
 }
-const CARD_WIDTH = 0.09
-const CARD_HEIGHT = 0.06
+const CARD_WIDTH = 0.12
+const CARD_HEIGHT = 0.18
 const PLACE_RADIUS = 0.07
 const FRAME_RATE = 60
 
 export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     const engine = new Engine(canvas)
+
     const scene = new Scene(engine)
-    // const camera = new UniversalCamera('camera1', new Vector3(0, 2.5, 0), scene)
-    const hlChips = new HighlightLayer("hl-chips", scene);
-    const hlChipInHand = new HighlightLayer("hl-chip-in-hand", scene);
-    const animCardStak: AnimationCard[] = []
-    const camera = new ArcRotateCamera('camera', Math.PI / 2, Math.PI / 2.8, 1.9, new Vector3(0, 0.7, 0), scene)
-    // camera.upperBetaLimit = Math.PI / 2.2;
-    camera.attachControl(true)
+    new ArcRotateCamera('camera', Math.PI / 2, Math.PI / 8, 1.9, new Vector3(0, 0.7, 0), scene)
+
     var light = new HemisphericLight("light", new Vector3(0, 1, 0), scene);
     light.intensity = 1;
-    //------------------------------------------------------------//
-    const floor = createFloor(scene)
+
+    createFloor(scene)
+
     const table = createTable(scene)
     table.position = new Vector3(0, 0.7, 0)
-    const deckPosition = new Vector3(-0.5, 0.753, 0)
-    const dealer = createDealer(scene)
+
+    createDealer(scene)
     const dealer3d = {
-        placePosition: new Vector3(0, 0.71, -0.1),
+        placePosition: new Vector3(0, 0.71, -0.4),
         cards: [] as Card3d[]
     }
-    //-------------------Places---------------------------------//
-    const firstPlacePos = new Vector3((0.4), table.position.y + 0.001, 0.7)
+
+    const animCardStak: AnimationCard[] = []
+    const deckPosition = new Vector3(-0.7, 0.753, -0.4)
+    const firstPlacePos = new Vector3(0.5, table.position.y + 0.001, 0.5)
     const ChipStartPos = new Vector3(0, 0.9, 0)
+
     const places3d: Place[] = []
+
     for (let i = 0; i < 3; i++) {
         const tablePlace = game.addPlace(i)
         const chips: Mesh[] = []
         const place = createPlace(game.player.id, i, tablePlace, chips, scene)
         let pos = i % 2 === 0 ? 0 : 0.10
-        place.position = new Vector3((firstPlacePos.x - i * 0.4), firstPlacePos.y, firstPlacePos.z + pos)
+        place.position = new Vector3((firstPlacePos.x - i * 0.5), firstPlacePos.y, firstPlacePos.z + pos)
         places3d.push({ place: place, hands: [], chips })
     }
-    const deck = createDeck()
+
+    createDeck()
+
     reaction(
         () => game.status,
         async status => {
@@ -122,7 +122,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
                         isAllStand => {
                             if (isAllStand) {
                                 playing()
-                                game.status = GameStatus.PLAYING_DEALER
+                                game.setStatus(GameStatus.PLAYING_DEALER)
                             }
                         }
                     )
@@ -130,18 +130,18 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
                 }
                 case GameStatus.PLAYING_DEALER: {
                     await playDealer()
-                    game.status = GameStatus.CALC_FINAL_RESULT
+                    game.setStatus(GameStatus.CALC_FINAL_RESULT)
                     break;
                 }
                 case GameStatus.CALC_FINAL_RESULT: {
                     game.calcFinalResult()
-                    setTimeout(() => game.status = GameStatus.CLEAR_CARDS, 3000)
+                    setTimeout(() => game.setStatus(GameStatus.CLEAR_CARDS), 3000)
                     break;
                 }
                 case GameStatus.CLEAR_CARDS: {
                     clearTable()
                     game.clearTable()
-                    game.status = GameStatus.WAITING_BETS
+                    game.setStatus(GameStatus.WAITING_BETS)
                     game.setTimer(10)
                     break;
                 }
@@ -149,9 +149,11 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
             }
         }
     )
+
     engine.runRenderLoop(() => {
         scene.render()
     })
+
     async function deal() {
         const hand3d: { mesh: Mesh, position: Vector3 }[][] = []
         game.places.forEach((place, placeIdx) => {
@@ -197,7 +199,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
             })
         })
         await dealCard(animCardStak, scene)
-        game.status = GameStatus.PLAYING_PLAYERS
+        game.setStatus(GameStatus.PLAYING_PLAYERS)
     }
     async function playDealer() {
         while (game.dealer.hand.score < 17) {
@@ -314,7 +316,8 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         const material = new StandardMaterial('place-ellipse-mat', scene)
         const texture = new Texture('./textures/ellipse.png', scene)
         material.opacityTexture = texture
-        material.diffuseTexture = texture
+        material.emissiveTexture = texture
+        material.disableLighting = true
         place.rotation.x = Math.PI / 2
         place.material = material
         //--------------//
@@ -334,12 +337,14 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         namePlane.material = nameMat
         textureName.drawText(text, null, null, font, "black", Color.green, true)
         place.actionManager = new ActionManager(scene)
+        namePlane.actionManager = place.actionManager
         place.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
             if (tablePlace.playerID) {
                 const { player } = game
                 if (player.chipInHand && game.status === GameStatus.WAITING_BETS) {
                     game.addChipsToBet(placeId)
                     const chip = createChip()
+                    chip.actionManager = place.actionManager
                     chip.position = ChipStartPos;
                     betChipAnimation(chip, place.getAbsolutePosition(), scene)
                     chips.push(chip)
@@ -381,7 +386,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         const faceUV = Array(6)
         faceUV[4] = new Vector4(column * 1 / columns, 1 * row / rows, (column + 1) * 1 / columns, (row + 1) * 1 / rows);
         faceUV[5] = new Vector4(2 * 1 / columns, 1 * 5 / rows, (2 + 1) * 1 / columns, (5 + 1) * 1 / rows);
-        const card = MeshBuilder.CreateBox('card', { width: 0.12, height: 0.001, faceUV: faceUV, depth: 0.18, wrap: true })
+        const card = MeshBuilder.CreateBox('card', { width: CARD_WIDTH, height: 0.001, faceUV: faceUV, depth: CARD_HEIGHT, wrap: true })
         card.rotation.z = Math.PI
         card.position = position
         card.material = mat
@@ -391,8 +396,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     function createFloor(scene: Scene): Mesh {
         const ground = GroundBuilder.CreateGround('floor', { width: 15, height: 10 }, scene)
         const mat = new StandardMaterial('groundMat', scene)
-        const texture = new Texture('./textures/floor.jpg', scene)
-        mat.diffuseTexture = texture
+        mat.diffuseColor = Color3.FromHexString("#00BCD4")
         ground.material = mat;
         return ground
     }
