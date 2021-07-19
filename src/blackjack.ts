@@ -338,12 +338,14 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
             if (tablePlace.playerID) {
                 const { player } = game
                 if (player.chipInHand && game.status === GameStatus.WAITING_BETS) {
-                    game.addChipsToBet(placeId)
-                    const chip = createChip()
-                    chip.actionManager = place.actionManager
-                    chip.position = ChipStartPos;
-                    betChipAnimation(chip, place.getAbsolutePosition(), scene)
-                    chips.push(chip)
+                    if (player.chips >= player.chipInHand) {
+                        game.addChipsToBet(placeId)
+                        const chip = createChip()
+                        chip.actionManager = place.actionManager
+                        chip.position = ChipStartPos;
+                        betChipAnimation(chip, place.getAbsolutePosition(), scene)
+                        chips.push(chip)
+                    }
                 }
             } else {
                 textureName.clear()
