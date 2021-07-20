@@ -8,9 +8,10 @@ display: flex;
 justify-content: space-around;
 align-items: center;
 z-index: 3;
-bottom: 0;
-width: 25%;
-padding-bottom: 10px;
+bottom: 10px;
+left: 10px;
+width: max-content;
+margin-right: 10px;
 `
 export default function BottomBar() {
     return (

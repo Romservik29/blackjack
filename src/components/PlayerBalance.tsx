@@ -7,7 +7,6 @@ import { useStore } from '../store'
 const BalanceContainer = styled.div`
 display: flex;
 flex-direction: column;
-justify-content: center;
 align-items: center;
 border: 2px solid yellow;
 border-radius: 17px;

@@ -16,6 +16,7 @@ width: min-content;
 padding: 0.25em 1.5em 0.25em 1.5em;
 font-size: 1.2em;
 height: min-content;
+margin-left: 10px;
 `
 
 export default observer((): JSX.Element => {
