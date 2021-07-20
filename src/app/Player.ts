@@ -3,11 +3,11 @@ import { makeObservable, observable } from 'mobx';
 export class Player {
     readonly id: string;
     chips: number;
-    chipInHand: number;
+    chipInHand: number = 0;
     constructor(id: string, chips: number) {
         this.id = id
         this.chips = chips
-        this.chipInHand = 100
+        this.setChipInHand(100)
         makeObservable(this, {
             chips: observable,
             chipInHand: observable

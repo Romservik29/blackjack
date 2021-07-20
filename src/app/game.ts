@@ -32,15 +32,14 @@ export class Game {
     status: GameStatus;
     players: Array<Player> = [];
     places: Array<TablePlace> = [];
-    interval: number | null;
-    timer: number;
+    timer: number = 0;
+    totalBet: number = 0;
+    private interval: number | null = null;
     constructor(dealerName: string, playerID: string, chips = 5000, deck = new Deck()) {
         this.player = new Player(playerID, chips)
         this.players.push(this.player)
         this.dealer = new Dealer(dealerName)
         this.deck = deck
-        this.interval = null
-        this.timer = 0
         this.status = GameStatus.WAITING_BETS
         this.setTimer(10)
         makeAutoObservable(this)
@@ -68,12 +67,13 @@ export class Game {
     }
     get handsHasBet(): Array<PlayerHand> {
         let hands: Array<PlayerHand> = []
-        this.places.forEach((place) => {
-            if (place.bet > 0) {
-                hands.push(...place.hands)
-            }
+        this.placeHasBet.forEach((place) => {
+            hands.push(...place.hands)
         })
         return hands
+    }
+    get placeHasBet(): Array<TablePlace> {
+        return this.places.filter((place) => place.bet > 0)
     }
     setTimer(time: number): void {
         if (this.interval) {
@@ -102,9 +102,11 @@ export class Game {
         place.setPlayer(this.player.id)
     }
     addChipsToBet(placeId: number): void {
+        const { chipInHand } = this.player
         const place = this.getPlace(placeId)
-        this.player.minusChips(this.player.chipInHand)
-        place.addChipsToBet(this.player.chipInHand)
+        this.player.minusChips(chipInHand)
+        place.addChipsToBet(chipInHand)
+        this.totalBet += chipInHand
     }
     clearBet(placeId: number): void {
         const place = this.getPlace(placeId)
@@ -123,13 +125,14 @@ export class Game {
     double(placeId: number, handIdx: number): void {
         const place = this.getPlace(placeId)
         const hand = place.hands[handIdx]
-        if (hand.isStandOrOver) {
+        if (hand.isStandOrOver || place.bet > this.player.chips) {
             return
+        } else {
+            hand.hit(this.deck.takeCard())
+            hand.stand()
+            this.player.minusChips(place.bet)
+            place.bet *= 2
         }
-        hand.hit(this.deck.takeCard())
-        hand.stand()
-        this.player.minusChips(place.bet)
-        place.bet *= 2
     }
     split(placeId: number, handIdx: number): void {
         const place = this.getPlace(placeId)
@@ -185,7 +188,7 @@ export class Game {
         }
     }
 
-    private getPlayer(playerId: string): Player {
+    getPlayer(playerId: string): Player {
         const player = this.players.find((player) => playerId === player.id)
         if (player) {
             return player
@@ -222,6 +225,7 @@ export class Game {
             place.bet = 0
             place.hands.length = 0
         })
+        this.totalBet = 0
         this.dealer.hand.cards.length = 0
     }
 }

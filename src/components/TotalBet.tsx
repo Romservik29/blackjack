@@ -1,10 +1,9 @@
 import { observer } from 'mobx-react-lite'
-import React from 'react'
 import styled from 'styled-components'
 import { Color } from '../color'
 import { useStore } from '../store'
 
-const BalanceContainer = styled.div`
+const StyledCurrenBet = styled.div`
 display: flex;
 flex-direction: column;
 justify-content: center;
@@ -19,12 +18,17 @@ font-size: 1.2em;
 height: min-content;
 `
 
-export default observer(() => {
+export default observer((): JSX.Element => {
     const gameStore = useStore("Game")
     return (
-        <BalanceContainer>
-            <span>BALANCE</span>
-            <span style={{ color: Color.yellow }}>{gameStore.player.chips}</span>
-        </BalanceContainer>
+        <>
+            {
+                gameStore.totalBet > 0
+                && <StyledCurrenBet>
+                    <span>Total</span>
+                    <span style={{ color: Color.yellow }}>{gameStore.totalBet}</span>
+                </StyledCurrenBet>
+            }
+        </>
     )
 })

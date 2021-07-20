@@ -414,8 +414,8 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     }
 
     function createTable(scene: Scene): Mesh {
-        const disc = MeshBuilder.CreateDisc("disc", { radius: 1, tessellation: 64 });
-        const borderTable = MeshBuilder.CreateTorus('tableBorder', { diameter: 2, tessellation: 64, thickness: 0.1 })
+        const disc = MeshBuilder.CreateDisc("disc", { radius: 1, tessellation: 128 });
+        const borderTable = MeshBuilder.CreateTorus('tableBorder', { diameter: 2, tessellation: 128, thickness: 0.1 })
         disc.rotation.x = Math.PI / 2
         disc.rotation.z = Math.PI / 2
         const mat = new StandardMaterial('tableDiscMat', scene)

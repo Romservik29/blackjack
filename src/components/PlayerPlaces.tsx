@@ -13,7 +13,8 @@ export default observer(() => {
                     <PlayerPlace
                         gameStatus={gameStore.status}
                         playerHand={hand}
-                        dealerHand={gameStore.dealer.hand} />))
+                        dealerHand={gameStore.dealer.hand}
+                        />))
             : null
     }
     </>

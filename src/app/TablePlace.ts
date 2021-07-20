@@ -10,7 +10,8 @@ export class TablePlace {
         this.playerID = null
         this.hands = []
         this.bet = 0
-        makeAutoObservable(this)
+        makeAutoObservable(this, {
+        })
     }
     setPlayer(playerId: string) {
         this.playerID = playerId

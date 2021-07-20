@@ -1,8 +1,9 @@
 import styled from 'styled-components';
-import { GameResult } from '../app/game'
+import { GameResult, GameStatus } from '../app/game'
 
 interface HandResultPros {
     result: GameResult
+    gameStatus: GameStatus
     style?: React.CSSProperties
 }
 const Result = styled.div`
@@ -19,11 +20,12 @@ const Result = styled.div`
   align-items: center;
   justify-content: center;
 `;
-export default function HandResult({ result, ...props }: HandResultPros) {
+export default function HandResult({ result, gameStatus, ...props }: HandResultPros) {
     const results = ["BJ", "W", "TIE", "❌"]
-    return (
-        <Result {...props}>
+    return (gameStatus === GameStatus.CALC_FINAL_RESULT
+        ? <Result {...props}>
             {results[result]}
         </Result>
+        : null
     )
 }

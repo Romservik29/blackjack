@@ -38,11 +38,9 @@ export default observer(({ playerHand, dealerHand, gameStatus }: PlayerProps) =>
             <StyledScore>
                 <Score value={playerHand.score} />
             </StyledScore>
-            {gameStatus === GameStatus.CALC_FINAL_RESULT
-            &&<StyledResult>
-                <HandResult style={{ position: "relative", top: 0 }} result={playerHand.result(dealerHand)} />
+            <StyledResult>
+                <HandResult gameStatus={gameStatus} style={{ position: "relative", top: 0 }} result={playerHand.result(dealerHand)} />
             </StyledResult>
-            }
             <GameButtons placeId={playerHand.placeId} handIdx={playerHand.idx} />
         </Styled>
     )
