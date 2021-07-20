@@ -122,7 +122,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
                         isAllStand => {
                             if (isAllStand) {
                                 playing()
-                                game.setStatus(GameStatus.PLAYING_DEALER)
+                                setTimeout(() => game.setStatus(GameStatus.PLAYING_DEALER), 1000)
                             }
                         }
                     )
