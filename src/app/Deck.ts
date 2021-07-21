@@ -10,6 +10,7 @@ export class Deck {
         })
     }
     createDeck(): void {
+        this.deck.length = 0
         suits.forEach((suit: AnySuit) => {
             rank.forEach((card: AnyRank) => {
                 this.deck.push(new Card(suit, card))
@@ -23,7 +24,7 @@ export class Deck {
         while (count < max) {
             count++
             for (let i = this.deck.length - 1; i > 0; i--) {
-                let j = Math.floor(Math.random() * this.deck.length);
+                let j = Math.floor(Math.random() * this.deck.length - 1);
                 let temp = this.deck[i];
                 this.deck[i] = this.deck[j];
                 this.deck[j] = temp;
