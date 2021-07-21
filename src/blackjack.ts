@@ -191,14 +191,13 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
             const card3d: Card3d = { cardMesh: createCard(card.rank, card.suit, deckPosition), card }
             dealer3d.cards.push(card3d)
             const { x, y, z } = dealer3d.placePosition
-            const position =
-                delerHand.push({
-                    mesh: card3d.cardMesh,
-                    pos: new Vector3(
-                        x - (idx * CARD_WIDTH / 2),
-                        y + (idx * 0.001),
-                        z)
-                })
+            delerHand.push({
+                mesh: card3d.cardMesh,
+                pos: new Vector3(
+                    x - (idx * CARD_WIDTH / 2),
+                    y + (idx * 0.001),
+                    z)
+            })
         })
         await dealCard(animCardStak, scene)
         await createAnimationCard(delerHand[0].mesh, delerHand[0].pos, true, scene)
@@ -221,6 +220,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
             }
         })
         await dealerFaceUpCard(dealer3d.cards[1].cardMesh, scene)
+        game.dealer.hand.cards[1].isFaceUp =true;
         await dealCard(animCardStak, scene)
     }
 

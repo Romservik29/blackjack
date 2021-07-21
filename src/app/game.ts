@@ -1,6 +1,6 @@
 import { PlayerHand } from './PlayerHand';
 import { TablePlace } from './TablePlace';
-import { makeAutoObservable, reaction, toJS } from 'mobx';
+import { makeAutoObservable, reaction } from 'mobx';
 import { Dealer } from './Dealer';
 import { Deck } from './Deck';
 import { Player } from './Player';
@@ -173,21 +173,26 @@ export class Game {
                 place.hands.push(hand);
             }
         })
-        this.dealer.hand.cards = [this.deck.takeCard(), this.deck.takeCard()]
-        console.log(toJS(this.places))
+        const card2 = this.deck.takeCard();
+        card2.isFaceUp = false
+        this.dealer.hand.cards = [this.deck.takeCard(), card2]
     }
     playDealer(maxValue: number): void {
-        let maxScore = 0
-        this.handsHasBet.forEach(hand => {
-            if (maxScore < hand.score) {
-                maxScore = hand.score
-            }
-        })
-        while (this.dealer.hand.score < maxValue && this.dealer.hand.score <= maxScore) {
+        while (this.dealerCanTakeCard(maxValue)) {
             this.dealer.hand.takeCard(this.deck.takeCard())
         }
     }
-
+    dealerCanTakeCard(maxValue: number): boolean {
+        let maxScore = 0
+        this.handsHasBet.forEach(hand => {
+            if (maxScore < hand.score && hand.score < 22) {
+                maxScore = hand.score
+            }
+        })
+        return (
+            this.dealer.hand.score < maxValue
+            && this.dealer.hand.score <= maxScore)
+    }
     getPlayer(playerId: string): Player {
         const player = this.players.find((player) => playerId === player.id)
         if (player) {

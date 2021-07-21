@@ -31,7 +31,7 @@ export class PlayerHand {
 
     }
     get isStandOrOver(): boolean {
-        if (this.score > 21) {
+        if (this.score > 20) {
             return true
         }
         return this.isStand
