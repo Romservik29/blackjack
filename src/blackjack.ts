@@ -38,7 +38,7 @@ interface AnimationCard {
     mesh: Mesh
     position: Vector3
 }
-const CARD_WIDTH = 0.12
+const CARD_WIDTH = 0.124
 const CARD_HEIGHT = 0.18
 const PLACE_RADIUS = 0.07
 const FRAME_RATE = 60
@@ -220,7 +220,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
             }
         })
         await dealerFaceUpCard(dealer3d.cards[1].cardMesh, scene)
-        game.dealer.hand.cards[1].isFaceUp =true;
+        game.dealer.hand.cards[1].isFaceUp = true;
         await dealCard(animCardStak, scene)
     }
 
@@ -242,7 +242,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         })
         dealer3d.cards.length = 0
     }
-    async function dealCard(cards: Array<{ mesh: Mesh, position: Vector3 }>, scene: Scene,) {
+    async function dealCard(cards: Array<AnimationCard>, scene: Scene,) {
         for (const card of cards) {
             await createAnimationCard(card.mesh, card.position, true, scene)
         }
