@@ -1,13 +1,12 @@
-import { AnyRank, AnySuit } from './../Card';
+import { AnyRank } from './../Card';
 import { Card } from '../Card';
 import { PlayerHand } from '../PlayerHand';
 describe('PlayerHand tests', () => {
     it('take card', () => {
         const hand = new PlayerHand(0, 0)
-        hand.takeCard(new Card("Club", "10"))
-        expect(hand.cards[0].rank).toBe("10")
-        expect(hand.cards[0].suit).toBe("Club")
-        expect(hand.cards[0].value).toBe(10)
+        const card = new Card("Club", "10")
+        hand.takeCard(card)
+        expect(hand.cards[0]).toEqual(card)
     })
     it('hit', () => {
         const hand = new PlayerHand(0, 0)
@@ -29,9 +28,9 @@ describe('PlayerHand tests', () => {
         expect(hand.isStand).toBe(true)
     })
     describe.each([
-        ["A", "A", 20],
-        ["A", "10", 20],
-        ["A", "K", 20],
+        ["A", "A", 12],
+        ["A", "10", 21],
+        ["A", "K", 21],
         ["5", "5", 10]
     ])('get score', (a, b, expected) => {
         it('test', () => {
@@ -41,38 +40,38 @@ describe('PlayerHand tests', () => {
             expect(hand.score).toBe(expected)
         })
     })
-    describe('split', () => {
-        it('error split when hand empty', () => {
+    describe('isSplitable', () => {
+        it('splitable', () => {
             const hand = new PlayerHand(0, 0)
-            expect(() => hand.split(0)).toThrowError()
-        })
-        it('isSplitable when 2 cards with 2 equal rank', () => {
-            const hand = new PlayerHand(0, 0)
-            hand.takeCard(new Card("Club", "7"))
-            hand.takeCard(new Card("Diamond", "7"))
+            const card = new Card('Club', '10')
+            const card2 = new Card('Diamond', '10')
+            hand.takeCard(card)
+            hand.takeCard(card2)
             expect(hand.isSplitable()).toBe(true)
         })
-        it('1 card when splited', () => {
+        it('not splitable', () => {
             const hand = new PlayerHand(0, 0)
-            hand.takeCard(new Card("Club", "7"))
-            hand.takeCard(new Card("Diamond", "7"))
-            expect(hand.split(0).cards.length).toBe(1)
+            const card = new Card('Club', '10')
+            const card2 = new Card('Diamond', '9')
+            hand.takeCard(card)
+            hand.takeCard(card2)
+            expect(hand.isSplitable()).toBe(false)
         })
-        it('return hand when splited', () => {
+        it('splitable error', () => {
             const hand = new PlayerHand(0, 0)
-            hand.takeCard(new Card("Club", "7"))
-            hand.takeCard(new Card("Diamond", "7"))
-            const splitedHand = new PlayerHand(0, 0)
-            splitedHand.takeCard(new Card("Club", "7"))
-            splitedHand.idx = 1
-            expect(hand.split(0)).toEqual(splitedHand)
+            const card = new Card('Club', '10')
+            hand.takeCard(card)
+            expect(() => hand.isSplitable()).toThrowError()
         })
-        it('has card 7 Diamond when splited', () => {
-            const hand = new PlayerHand(0, 0)
-            hand.takeCard(new Card("Club", "7"))
-            hand.takeCard(new Card("Diamond", "7"))
-            hand.split(0)
-            expect(hand.cards[0]).toEqual(new Card("Diamond", "7"))
-        })
+    })
+    it('split', () => {
+        const hand = new PlayerHand(0, 0)
+        const card = new Card("Club", "2")
+        const card2 = new Card("Diamond", "2")
+        hand.takeCard(card)
+        hand.takeCard(card2)
+        const hand2 = new PlayerHand(0, 1)
+        hand2.takeCard(card)
+        expect(hand.split(0)).toEqual(hand2)
     })
 })
