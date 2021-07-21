@@ -92,29 +92,28 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
                 case GameStatus.PLAYING_PLAYERS: {
                     const playing = autorun(
                         () => {
-                            game.places.forEach((place, placeIdx) => {
-                                place.hands.forEach((hand, handIdx) => {
-                                    const hand3d = places3d[placeIdx].hands[handIdx]
-                                    if (hand.cards.length !== hand3d.cards.length) {
-                                        hand.cards.forEach((card, cardIdx) => {
-                                            if (hand3d.cards[cardIdx] === undefined) {
-                                                const card3d: Card3d = { cardMesh: createCard(card.rank, card.suit, deckPosition), card }
-                                                const place3d = places3d[placeIdx]
-                                                place3d.hands[handIdx].cards.push(card3d)
-                                                const { x, y, z } = place3d.place.getAbsolutePosition()
-                                                const animcard = {
-                                                    mesh: card3d.cardMesh,
-                                                    position: new Vector3(
-                                                        x - (cardIdx * CARD_WIDTH / 2),
-                                                        y + (cardIdx * 0.001),
-                                                        z - (cardIdx * CARD_HEIGHT / 2 + PLACE_RADIUS * 2)
-                                                    )
-                                                }
-                                                createAnimationCard(animcard.mesh, animcard.position, scene)
+                            game.handsHasBet.forEach((hand) => {
+                                const placeIdx = hand.placeId
+                                const hand3d = places3d[placeIdx].hands[hand.idx]
+                                if (hand.cards.length !== hand3d.cards.length) {
+                                    hand.cards.forEach((card, cardIdx) => {
+                                        if (hand3d.cards[cardIdx] === undefined) {
+                                            const card3d: Card3d = { cardMesh: createCard(card.rank, card.suit, deckPosition), card }
+                                            const place3d = places3d[placeIdx]
+                                            place3d.hands[hand.idx].cards.push(card3d)
+                                            const { x, y, z } = place3d.place.getAbsolutePosition()
+                                            const animcard = {
+                                                mesh: card3d.cardMesh,
+                                                position: new Vector3(
+                                                    x - (cardIdx * CARD_WIDTH / 2),
+                                                    y + (cardIdx * 0.001),
+                                                    z - (cardIdx * CARD_HEIGHT / 2 + PLACE_RADIUS * 2)
+                                                )
                                             }
-                                        })
-                                    }
-                                })
+                                            createAnimationCard(animcard.mesh, animcard.position, true, scene)
+                                        }
+                                    })
+                                }
                             })
                         })
                     reaction(
@@ -187,19 +186,23 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
                 animCardStak.push(hand3d[j][i])
             }
         }
+        const delerHand: { mesh: Mesh, pos: Vector3 }[] = []
         game.dealer.hand.cards.forEach((card, idx) => {
             const card3d: Card3d = { cardMesh: createCard(card.rank, card.suit, deckPosition), card }
             dealer3d.cards.push(card3d)
             const { x, y, z } = dealer3d.placePosition
-            animCardStak.push({
-                mesh: card3d.cardMesh,
-                position: new Vector3(
-                    x - (idx * CARD_WIDTH / 2),
-                    y + (idx * 0.001),
-                    z)
-            })
+            const position =
+                delerHand.push({
+                    mesh: card3d.cardMesh,
+                    pos: new Vector3(
+                        x - (idx * CARD_WIDTH / 2),
+                        y + (idx * 0.001),
+                        z)
+                })
         })
         await dealCard(animCardStak, scene)
+        await createAnimationCard(delerHand[0].mesh, delerHand[0].pos, true, scene)
+        await createAnimationCard(delerHand[1].mesh, delerHand[1].pos, false, scene)
         game.setStatus(GameStatus.PLAYING_PLAYERS)
     }
     async function playDealer() {
@@ -217,6 +220,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
                 })
             }
         })
+        await dealerFaceUpCard(dealer3d.cards[1].cardMesh, scene)
         await dealCard(animCardStak, scene)
     }
 
@@ -240,11 +244,11 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     }
     async function dealCard(cards: Array<{ mesh: Mesh, position: Vector3 }>, scene: Scene,) {
         for (const card of cards) {
-            await createAnimationCard(card.mesh, card.position, scene)
+            await createAnimationCard(card.mesh, card.position, true, scene)
         }
         animCardStak.length = 0
     }
-    async function createAnimationCard(card: Mesh, position: Vector3, scene: Scene) {
+    async function createAnimationCard(card: Mesh, position: Vector3, rotate: boolean, scene: Scene) {
         const moveAnimation = new Animation("card-move-animation", "position", FRAME_RATE, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
         const moveFrames = [];
         moveFrames.push({
@@ -252,10 +256,12 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
             value: card.position
         });
         const { x, y, z } = position;
-        moveFrames.push({
-            frame: FRAME_RATE / 2,
-            value: new Vector3(x - (x / 2), y + 0.15, z - (z / 2))
-        });
+        if (rotate) {
+            moveFrames.push({
+                frame: FRAME_RATE / 2,
+                value: new Vector3(x - (x / 2), y + 0.15, z - (z / 2))
+            });
+        }
         moveFrames.push({
             frame: FRAME_RATE,
             value: position
@@ -275,11 +281,48 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
         });
         rotateAnimation.setKeys(rotateFrames)
         card.animations.push(moveAnimation)
+        if (rotate) {
+            card.animations.push(rotateAnimation)
+        }
+        const anim = scene.beginAnimation(card, 0, FRAME_RATE, false);
+        await anim.waitAsync()
+    }
+    async function dealerFaceUpCard(card: Mesh, scene: Scene) {
+        const moveAnimation = new Animation("card-move-animation", "position.y", FRAME_RATE, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CONSTANT);
+        const moveFrames = [];
+        const y = card.position.y
+        moveFrames.push({
+            frame: 0,
+            value: y
+        });
+        moveFrames.push({
+            frame: FRAME_RATE / 2,
+            value: y + 0.2
+        });
+        moveFrames.push({
+            frame: FRAME_RATE,
+            value: y
+        });
+
+        moveAnimation.setKeys(moveFrames);
+
+        const rotateAnimation = new Animation("card-rotate-animation", "rotation.z", FRAME_RATE, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CONSTANT);
+        const rotateFrames = []
+        rotateFrames.push({
+            frame: 0,
+            value: Math.PI
+        });
+        rotateFrames.push({
+            frame: FRAME_RATE,
+            value: 0
+        });
+        rotateAnimation.setKeys(rotateFrames)
+        card.animations.length = 0;
+        card.animations.push(moveAnimation)
         card.animations.push(rotateAnimation)
         const anim = scene.beginAnimation(card, 0, FRAME_RATE, false);
         await anim.waitAsync()
     }
-
     function betChipAnimation(chip: Mesh, position: Vector3, scene: Scene) {
         const moveAnimation = new Animation("move", "position", FRAME_RATE, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT)
         const moveKeys = []

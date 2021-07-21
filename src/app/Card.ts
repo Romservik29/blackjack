@@ -4,6 +4,7 @@ export class Card {
     suit: AnySuit
     rank: AnyRank
     value: number
+    isFaceUp: boolean = true
     constructor(suit: AnySuit, rank: AnyRank) {
         this.suit = suit
         this.rank = rank

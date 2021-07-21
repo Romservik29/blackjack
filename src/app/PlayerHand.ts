@@ -73,7 +73,9 @@ export class PlayerHand {
                 if (card.rank === "A") {
                     aces += 1
                 }
-                value += card.value
+                if (card.isFaceUp) {
+                    value += card.value
+                }
             }
         )
         for (let i = 0; i < aces; i++) {
