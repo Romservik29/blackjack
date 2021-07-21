@@ -9,12 +9,13 @@ export default observer(() => {
         gameStore.status > 1
             ? gameStore
                 .handsHasBet
-                .map(((hand) =>
+                .map(((hand, idx) =>
                     <PlayerPlace
+                        key={idx}
                         gameStatus={gameStore.status}
                         playerHand={hand}
                         dealerHand={gameStore.dealer.hand}
-                        />))
+                    />))
             : null
     }
     </>

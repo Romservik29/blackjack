@@ -29,8 +29,8 @@ export default observer(({ value }: ChipProps) => {
                 cy="32"
                 r="28"
                 stroke="black"
-                stroke-width="8"
-                stroke-dasharray="15 14"
+                strokeWidth="8"
+                strokeDasharray="15 14"
                 style={{ transform: "rotate(17deg)", transformOrigin: "center" }}
             />
             <circle
@@ -39,9 +39,9 @@ export default observer(({ value }: ChipProps) => {
                 cy="32"
                 r="28"
                 stroke="white"
-                stroke-width="8"
+                strokeWidth="8"
             />
-            <text fill="black" x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" style={{ pointerEvents: "none", fontWeight: 600 }}>
+            <text fill="black" x="50%" y="50%" dominantBaseline="middle" textAnchor="middle" style={{ pointerEvents: "none", fontWeight: 600 }}>
                 {value}
             </text>
         </svg>

@@ -11,7 +11,7 @@ height: 60%;
 export default function Chips() {
     return (
         <ChipsContainer>
-            {[25,50,100, 250, 500, 1000].map((value) => <Chip value={value} />)}
+            {[25, 50, 100, 250, 500, 1000].map((value, idx) => <Chip key={idx} value={value} />)}
         </ChipsContainer>
     )
 }

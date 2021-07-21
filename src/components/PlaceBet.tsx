@@ -1,3 +1,4 @@
+import { useMemo } from "react"
 import styled from "styled-components"
 import { TablePlace } from "../app/TablePlace"
 
@@ -19,7 +20,7 @@ border-radius: 4px;
 `
 
 export const PlaceBet = ({ place }: { place: TablePlace }) => {
-    const bot = 10 - (place.id % 2 === 0 ? 0 : 7)
-    const left = 28.5 + (place.id * 20)
-    return <StyledBet bot={bot} left={left} children={place.bet} />
+    const bot = useMemo(() => 10 - (place.id % 2 === 0 ? 0 : 7), [place.id])
+    const left = useMemo(() => 28.5 + (place.id * 20), [place.id])
+    return <StyledBet bot={bot} left={left}>{place.bet}</StyledBet>
 }

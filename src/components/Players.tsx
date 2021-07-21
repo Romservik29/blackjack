@@ -7,8 +7,8 @@ export default observer(() => {
     return (
         <>
             {gameStore.status > 1 &&
-                gameStore.handsHasBet.map((hand) =>
-                    <GameButtons placeId={hand.placeId} handIdx={hand.idx} />)
+                gameStore.handsHasBet.map((hand, idx) =>
+                    <GameButtons key={idx} placeId={hand.placeId} handIdx={hand.idx} />)
             }
         </>
     )

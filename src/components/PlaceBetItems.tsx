@@ -9,7 +9,7 @@ export default observer(() => {
         <>
             {gameStore
                 .placeHasBet
-                .map((place) => <PlaceBet place={place} />)}
+                .map((place,idx) => <PlaceBet key={idx} place={place} />)}
         </>
     )
 })
