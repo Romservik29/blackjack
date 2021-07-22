@@ -1,6 +1,6 @@
-import styled from 'styled-components'
-import PlayerBalance from '../PlayerBalance'
-import TotalBet from '../TotalBet'
+import styled from 'styled-components';
+import PlayerBalance from '../PlayerBalance';
+import TotalBet from '../TotalBet';
 
 const StyledBottomBar = styled.div`
 position: absolute;
@@ -12,12 +12,12 @@ bottom: 10px;
 left: 10px;
 width: max-content;
 margin-right: 10px;
-`
+`;
 export default function BottomBar() {
-    return (
-        <StyledBottomBar>
-            <PlayerBalance />
-            <TotalBet />
-        </StyledBottomBar>
-    )
+  return (
+    <StyledBottomBar>
+      <PlayerBalance />
+      <TotalBet />
+    </StyledBottomBar>
+  );
 }

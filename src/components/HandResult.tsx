@@ -1,5 +1,6 @@
 import styled from 'styled-components';
-import { GameResult, GameStatus } from '../app/game'
+import {GameResult, GameStatus} from '../app/enums';
+
 
 interface HandResultPros {
     result: GameResult
@@ -20,12 +21,12 @@ const Result = styled.div`
   align-items: center;
   justify-content: center;
 `;
-export default function HandResult({ result, gameStatus, ...props }: HandResultPros) {
-    const results = ["BJ", "W", "TIE", "❌"]
-    return (gameStatus === GameStatus.CALC_FINAL_RESULT
-        ? <Result {...props}>
-            {results[result]}
-        </Result>
-        : null
-    )
+export default function HandResult({result, gameStatus, ...props}: HandResultPros) {
+  const results = ['BJ', 'W', 'TIE', '❌'];
+  return (gameStatus === GameStatus.CALC_FINAL_RESULT ?
+        <Result {...props}>
+          {results[result]}
+        </Result> :
+        null
+  );
 }

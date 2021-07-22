@@ -1,25 +1,25 @@
-import { makeObservable, observable } from 'mobx';
+import {makeObservable, observable} from 'mobx';
 
 export class Player {
     readonly id: string;
     chips: number;
-    chipInHand: number = 0;
+    chipInHand: number;
     constructor(id: string, chips: number) {
-        this.id = id
-        this.chips = chips
-        this.setChipInHand(100)
-        makeObservable(this, {
-            chips: observable,
-            chipInHand: observable
-        })
+      this.id = id;
+      this.chips = chips;
+      this.chipInHand = 100;
+      makeObservable(this, {
+        chips: observable,
+        chipInHand: observable,
+      });
     }
-    setChipInHand = (value: number): void => {
-        this.chipInHand = value
+    setChipInHand(value: number): void {
+      this.chipInHand = value;
     }
     addChips(chips: number): void {
-        this.chips += chips
+      this.chips += chips;
     }
     minusChips(chips: number): void {
-        this.chips -= chips
+      this.chips -= chips;
     }
 }

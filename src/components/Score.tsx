@@ -1,4 +1,4 @@
-import styled from "styled-components"
+import styled from 'styled-components';
 
 type ScoreProps = {
     value: number
@@ -11,12 +11,12 @@ padding: 2px;
 height: min-content;
 color: white;
 background-color: #0025ff99;
-`
+`;
 
-export default function Score({ value }: ScoreProps) {
-    return (
-        <ScoreContainer>
-            {value}
-        </ScoreContainer>
-    )
+export default function Score({value}: ScoreProps) {
+  return (
+    <ScoreContainer>
+      {value}
+    </ScoreContainer>
+  );
 }

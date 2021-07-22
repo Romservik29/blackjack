@@ -1,8 +1,8 @@
-import { observer } from 'mobx-react-lite'
-import React from 'react'
-import styled from 'styled-components'
-import { Color } from '../color'
-import { useStore } from '../store'
+import {observer} from 'mobx-react-lite';
+import React from 'react';
+import styled from 'styled-components';
+import {Color} from '../color';
+import {useStore} from '../store';
 
 const BalanceContainer = styled.div`
 display: flex;
@@ -16,14 +16,14 @@ width: min-content;
 padding: 0.25em 1.5em 0.25em 1.5em;
 font-size: 1.2em;
 height: min-content;
-`
+`;
 
 export default observer(() => {
-    const gameStore = useStore("Game")
-    return (
-        <BalanceContainer>
-            <span>BALANCE</span>
-            <span style={{ color: Color.yellow }}>{gameStore.player.chips}</span>
-        </BalanceContainer>
-    )
-})
+  const gameStore = useStore('Game');
+  return (
+    <BalanceContainer>
+      <span>BALANCE</span>
+      <span style={{color: Color.yellow}}>{gameStore.player.chips}</span>
+    </BalanceContainer>
+  );
+});
