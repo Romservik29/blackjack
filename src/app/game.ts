@@ -34,7 +34,7 @@ export class Game {
     reaction(
         () => this.timer,
         (timer) => {
-          if (this.timer < 0 && this.status === GameStatus.WAITING_BETS) {
+          if (timer < 0 && this.status === GameStatus.WAITING_BETS) {
             if (this.hasBet) {
               this.deal();
             } else {
