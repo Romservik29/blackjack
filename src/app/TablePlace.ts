@@ -1,7 +1,7 @@
 import {PlayerHand} from './PlayerHand';
 import {makeAutoObservable} from 'mobx';
 export class TablePlace {
-    id: number
+    readonly id: number
     playerID: string | null
     hands: Array<PlayerHand>
     bet: number

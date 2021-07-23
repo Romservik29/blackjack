@@ -3,8 +3,8 @@ import {makeAutoObservable, when} from 'mobx';
 import {Card} from './Card';
 
 export class PlayerHand {
-    placeId: number
-    idx: number
+    readonly placeId: number
+    readonly idx: number
     cards: Array<Card> = []
     isStand = false
     constructor(placeId: number, idx: number) {
