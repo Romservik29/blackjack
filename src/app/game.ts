@@ -179,13 +179,15 @@ export class Game {
   dealerCanTakeCard(maxValue: number): boolean {
     let maxScore = 0;
     this.handsHasBet.forEach((hand) => {
-      if (maxScore < hand.score && hand.score < 22) {
+      const score = hand.getFullScore();
+      if (maxScore < score && score < 22) {
         maxScore = hand.score;
       }
     });
-    return (
-      this.dealer.hand.score < maxValue &&
-      this.dealer.hand.score <= maxScore);
+
+    const dealerScore = this.dealer.hand.getFullScore();
+
+    return dealerScore < maxValue && dealerScore <= maxScore;
   }
   getPlayer(playerId: string): Player {
     const player = this.players.find((player) => playerId === player.id);
