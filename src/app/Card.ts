@@ -1,3 +1,4 @@
+import {makeObservable, observable} from 'mobx';
 export type AnySuit = 'Heart' | 'Diamond' | 'Club' | 'Spade'
 export type AnyRank = '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' |
   'J' | 'Q' | 'K' | 'A'
@@ -10,6 +11,9 @@ export class Card {
     this.suit = suit;
     this.rank = rank;
     this.value = this.getValue(rank);
+    makeObservable(this, {
+      isFaceUp: observable,
+    });
   }
   private getValue(rank: AnyRank): number {
     if (rank === 'A') {
