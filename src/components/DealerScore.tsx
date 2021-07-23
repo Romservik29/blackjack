@@ -4,16 +4,17 @@ import {ScoreContainer} from './Score';
 
 export default observer(() => {
   const gameStore = useStore('Game');
-  const {score} = gameStore.dealer.hand;
+  const {hand} = gameStore.dealer;
+
   return (
     <>{
-            gameStore.status > 1 ?
-                < ScoreContainer
-                  style={{position: 'absolute', left: '50%', top: '35%', zIndex: 3}}
-                >
-                  {score}
-                </ScoreContainer > :
-                null
+      gameStore.status > 1 ?
+        < ScoreContainer
+          style={{position: 'absolute', left: '50%', top: '35%', zIndex: 3}}
+        >
+          {gameStore.status === 2 ? hand.score : hand.getFullScore()}
+        </ScoreContainer > :
+        null
     }
     </>
   );

@@ -21,7 +21,7 @@ import {
   Animation,
   HemisphericLight,
 } from '@babylonjs/core';
-import {autorun, reaction} from 'mobx';
+import {autorun, reaction, runInAction} from 'mobx';
 import {Texture} from '@babylonjs/core/Materials/Textures/texture';
 import {Card, AnySuit, AnyRank} from './app/Card';
 
@@ -223,7 +223,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
       }
     });
     await dealerFaceUpCard(dealer3d.cards[1].cardMesh, scene);
-    game.dealer.hand.cards[1].isFaceUp = true;
+    runInAction(()=>game.dealer.hand.cards[1].isFaceUp = true);
     await dealCard(animCardStak, scene);
   }
 
