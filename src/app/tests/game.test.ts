@@ -1,3 +1,4 @@
+import { Suit } from './../enums';
 import {TablePlace} from './../TablePlace';
 
 import {PlayerHand} from './../PlayerHand';
@@ -35,8 +36,8 @@ describe('game cycle', () => {
       game.addChipsToBet(0);
       const playerHand = new PlayerHand(setedPlace?.id, 0);
       setedPlace?.hands.push(playerHand);
-      playerHand.cards = [new Card('Club', '10'), new Card('Diamond', '10')];
-      game.dealer.hand.cards.push(...[new Card('Club', '10'), new Card('Diamond', '5')]);
+      playerHand.cards = [new Card(Suit.Club, '10'), new Card(Suit.Diamond, '10')];
+      game.dealer.hand.cards.push(...[new Card(Suit.Club, '10'), new Card(Suit.Diamond, '5')]);
       game.calcFinalResult();
       it('player have 5100 chips', () => {
         expect(game.player.chips).toBe(5100);
@@ -50,8 +51,8 @@ describe('game cycle', () => {
       game.addChipsToBet(0);
       const playerHand = new PlayerHand(setedPlace?.id, 0);
       setedPlace?.hands.push(playerHand);
-      playerHand.cards = [new Card('Club', '10'), new Card('Diamond', '5')];
-      game.dealer.hand.cards.push(...[new Card('Spade', '10'), new Card('Heart', '10')]);
+      playerHand.cards = [new Card(Suit.Club, '10'), new Card(Suit.Diamond, '5')];
+      game.dealer.hand.cards.push(...[new Card(Suit.Spade, '10'), new Card(Suit.Heart, '10')]);
       game.calcFinalResult();
       it('player have 4900 chips', () => {
         expect(game.player.chips).toBe(4900);
@@ -65,8 +66,8 @@ describe('game cycle', () => {
       game.addChipsToBet(0);
       const playerHand = new PlayerHand(setedPlace?.id, 0);
       setedPlace?.hands.push(playerHand);
-      playerHand.cards = [new Card('Club', '10'), new Card('Diamond', '10')];
-      game.dealer.hand.cards.push(...[new Card('Heart', '10'), new Card('Spade', '10')]);
+      playerHand.cards = [new Card(Suit.Club, '10'), new Card(Suit.Diamond, '10')];
+      game.dealer.hand.cards.push(...[new Card(Suit.Heart, '10'), new Card(Suit.Spade, '10')]);
       game.calcFinalResult();
       it('player have 5000 chips', () => {
         expect(game.player.chips).toBe(5000);
@@ -80,8 +81,8 @@ describe('game cycle', () => {
       game.addChipsToBet(0);
       const playerHand = new PlayerHand(setedPlace.id, 0);
       setedPlace.hands.push(playerHand);
-      playerHand.cards.push(...[new Card('Club', 'A'), new Card('Diamond', '10')]);
-      game.dealer.hand.cards.push(...[new Card('Heart', '10'), new Card('Spade', '10')]);
+      playerHand.cards.push(...[new Card(Suit.Club, 'A'), new Card(Suit.Diamond, '10')]);
+      game.dealer.hand.cards.push(...[new Card(Suit.Heart, '10'), new Card(Suit.Spade, '10')]);
       game.calcFinalResult();
       it('player have 5000 chips', () => {
         expect(game.player.chips).toBe(5150);

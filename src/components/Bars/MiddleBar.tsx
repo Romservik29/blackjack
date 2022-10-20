@@ -1,6 +1,5 @@
 import {observer} from 'mobx-react-lite';
 import styled from 'styled-components';
-import {GameStatus} from '../../app/enums';
 import {useStore} from '../../store';
 import Button from '../Buttons/Button';
 import Chips from '../Chips';
@@ -29,27 +28,31 @@ height: 100%;
 padding: 10px;
 background-color: #00000088;
 `;
+const PlaceYourBets = styled.div`
+  font-size: '3em';
+  color: 'white';
+  padding: 5;
+`;
+
 export default observer(() => {
   const gameStore = useStore('Game');
-  function deal() {
-    gameStore.deal();
+
+  if (!gameStore.isBetsOpen) {
+    return null;
   }
+
   return (
-        gameStore.status === GameStatus.WAITING_BETS ?
-            <StyledMiddleBar>
-              <Container>
-                <div style={{fontSize: '3em', color: 'white', padding: 5}}>
-                    Place your bets
-                </div>
-                < Chips />
-                <Timer>{gameStore.timer}</Timer>
-                {gameStore.hasBet &&
-                        <Button onClick={deal}>
-                            Deal
-                        </Button>
-                }
-              </Container>
-            </StyledMiddleBar> :
-            null
+    <StyledMiddleBar>
+      <Container>
+        <PlaceYourBets>
+          Place your bets
+        </PlaceYourBets>
+        <Chips />
+        <Timer>{gameStore.timer}</Timer>
+        {
+          gameStore.hasBet && <Button onClick={gameStore.deal}>Deal</Button>
+        }
+      </Container>
+    </StyledMiddleBar>
   );
 });

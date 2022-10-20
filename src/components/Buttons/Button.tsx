@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import {Color} from '../../color';
 type ButtonProps = {
     children?: React.ReactNode
-    onClick: Function
+    onClick: () => void;
 }
 
 const StyledButton = styled.div`
@@ -16,11 +16,8 @@ cursor: pointer;
 `;
 
 export default function Button(props: ButtonProps): JSX.Element {
-  function onClick() {
-    props.onClick();
-  }
   return (
-    <StyledButton onClick={onClick}>
+    <StyledButton onClick={props.onClick}>
       {props.children}
     </StyledButton>
   );

@@ -1,4 +1,5 @@
 import {observer} from 'mobx-react-lite';
+import React from 'react';
 import {useStore} from '../store';
 
 
@@ -6,17 +7,27 @@ type ChipProps = {
     value: number
 }
 
+const defaultColor = 'brown';
+
+const chipColorTuple: [number, string][] = [
+  [Number.POSITIVE_INFINITY, defaultColor],
+  [1000, 'blue'],
+  [500, 'yellow'],
+  [250, 'green'],
+  [100, 'grey'],
+  [50, 'pink'],
+  [0, 'red'],
+];
+
+function getChipColor(value: number): string {
+  return chipColorTuple.find((t) => value >= t[0])?.[1] ?? defaultColor;
+}
+
 export default observer(({value}: ChipProps) => {
   const gameStore = useStore('Game');
-  function onClick() {
-    gameStore.player.setChipInHand(value);
-  }
-  const {chipInHand} = gameStore.player;
-  const chipColor: string =
-  value > 999 ? 'blue' : value > 499 ?
-  'yellow' : value > 249 ?
-  'green' : value > 99 ?
-  'grey' : value > 49 ? 'pink' : 'red';
+  const onClick = React.useCallback(() => gameStore.player.setChipInHand(value), []);
+
+  const opacity = gameStore.player.chipInHand === value ? 0.5 : 0;
 
   return (
     <svg
@@ -29,7 +40,7 @@ export default observer(({value}: ChipProps) => {
         cx="32"
         cy="32"
         r="32"
-        fill={chipColor}
+        fill={getChipColor(value)}
       />
       <circle
         opacity="1"
@@ -42,7 +53,7 @@ export default observer(({value}: ChipProps) => {
         style={{transform: 'rotate(17deg)', transformOrigin: 'center'}}
       />
       <circle
-        opacity={chipInHand === value ? 0.5 : 0}
+        opacity={opacity}
         cx="32"
         cy="32"
         r="28"
