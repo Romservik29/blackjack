@@ -1,5 +1,5 @@
 /* eslint-disable new-cap */
-import {GameStatus} from './app/enums';
+import {GameStatus, Suit} from './app/enums';
 import {Color} from './color';
 import {Game} from './app/game';
 import {TablePlace} from './app/TablePlace';
@@ -22,7 +22,7 @@ import {
 } from '@babylonjs/core';
 import {autorun, reaction, runInAction} from 'mobx';
 import {Texture} from '@babylonjs/core/Materials/Textures/texture';
-import {Card, AnySuit, AnyRank} from './app/Card';
+import {Card, AnyRank} from './app/Card';
 
 interface Place {
     place: Mesh,
@@ -44,6 +44,20 @@ const CARD_WIDTH = 0.124;
 const CARD_HEIGHT = 0.18;
 const PLACE_RADIUS = 0.07;
 const FRAME_RATE = 60;
+
+const rowMap: Record<Suit, number> = {
+  [Suit.Spade]: 1,
+  [Suit.Heart]: 2,
+  [Suit.Diamond]: 3,
+  [Suit.Club]: 4,
+};
+
+const columnMap: Record<string, number> = {
+  J: 10,
+  Q: 11,
+  K: 12,
+  A: 0,
+};
 
 export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
   const engine = new Engine(canvas);
@@ -87,11 +101,11 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
       () => game.status,
       async (status) => {
         switch (status) {
-          case GameStatus.DEALING: {
+          case GameStatus.Dealing: {
             deal();
             break;
           }
-          case GameStatus.PLAYING_PLAYERS: {
+          case GameStatus.PlayingPlayers: {
             const playing = autorun(
                 () => {
                   game.handsHasBet.forEach((hand) => {
@@ -123,27 +137,27 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
                 (isAllStand) => {
                   if (isAllStand) {
                     playing();
-                    setTimeout(() => game.setStatus(GameStatus.PLAYING_DEALER), 1000);
+                    setTimeout(() => game.setStatus(GameStatus.PlayingDealer), 1000);
                   }
                 },
             );
             break;
           }
-          case GameStatus.PLAYING_DEALER: {
+          case GameStatus.PlayingDealer: {
             game.playDealer(17);
             await playDealer();
-            game.setStatus(GameStatus.CALC_FINAL_RESULT);
+            game.setStatus(GameStatus.Resolved);
             break;
           }
-          case GameStatus.CALC_FINAL_RESULT: {
+          case GameStatus.Resolved: {
             game.calcFinalResult();
-            setTimeout(() => game.setStatus(GameStatus.CLEAR_CARDS), 3000);
+            setTimeout(() => game.setStatus(GameStatus.ClearCards), 3000);
             break;
           }
-          case GameStatus.CLEAR_CARDS: {
+          case GameStatus.ClearCards: {
             clearTable();
             game.clearTable();
-            game.setStatus(GameStatus.WAITING_BETS);
+            game.setStatus(GameStatus.BetsOpen);
             game.setTimer(10);
             break;
           }
@@ -204,7 +218,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     await dealCard(animCardStak, scene);
     await createAnimationCard(delerHand[0].mesh, delerHand[0].pos, true, scene);
     await createAnimationCard(delerHand[1].mesh, delerHand[1].pos, false, scene);
-    game.setStatus(GameStatus.PLAYING_PLAYERS);
+    game.setStatus(GameStatus.PlayingPlayers);
   }
   async function playDealer() {
     game.dealer.hand.cards.forEach((card, cardIdx) => {
@@ -423,7 +437,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     place.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnPickUpTrigger, () => {
       if (tablePlace.playerID) {
         const {player} = game;
-        if (player.chipInHand && game.status === GameStatus.WAITING_BETS) {
+        if (player.chipInHand && game.status === GameStatus.BetsOpen) {
           if (player.chips >= player.chipInHand) {
             game.addChipsToBet(placeId);
             const chip = createChip();
@@ -442,31 +456,18 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     return place;
   }
 
-  function createCard(rank: AnyRank, suit: AnySuit, position: Vector3): Mesh {
+  function createCard(rank: AnyRank, suit: Suit, position: Vector3): Mesh {
     const mat = new StandardMaterial('mat', scene);
     const texture = new Texture(`./textures/cards/cards.png`, scene);
-    const row: number =
-            suit === 'Spade' ?
-                1 :
-                suit === 'Heart' ?
-                    2 :
-                    suit === 'Diamond' ?
-                        3 :
-                        4;
-    const column: number =
-            rank === 'J' ?
-                10 :
-                rank === 'Q' ? 11 :
-                    rank === 'K' ? 12 :
-                        rank === 'A' ?
-                            0 :
-                            +rank - 1;
-
+    const columns = 13;
+    const rows = 5;
 
     mat.emissiveTexture = texture;
     mat.disableLighting = true;
-    const columns = 13;
-    const rows = 5;
+
+    const row: number = rowMap[suit];
+    const column: number = Number(rank) ? +rank - 1 : columnMap[rank];
+
     const faceUV = Array(6);
     faceUV[4] = new Vector4(column * 1 / columns, 1 * row / rows, (column + 1) * 1 / columns, (row + 1) * 1 / rows);
     faceUV[5] = new Vector4(2 * 1 / columns, 1 * 5 / rows, (2 + 1) * 1 / columns, (5 + 1) * 1 / rows);
@@ -530,7 +531,7 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     const {x, y, z} = deckPosition;
     let posY = y;
     for (let i = 0; i < 52; i++) {
-      cards.push(createCard('2', 'Heart', new Vector3(x, posY, z)));
+      cards.push(createCard('2', Suit.Heart, new Vector3(x, posY, z)));
       posY -= 0.001;
     }
     return cards;

@@ -1,18 +1,19 @@
-import {AnyRank, AnySuit, Card} from './Card';
-const suits = ['Heart', 'Diamond', 'Club', 'Spade'] as const;
-const rank = ['2', '3', '4', '5', '6', '7', '8', '9', '10',
-  'J', 'Q', 'K', 'A'] as const;
+import {AnyRank, Card} from './Card';
+import {Suit} from './enums';
+
+const suits = [Suit.Heart, Suit.Diamond, Suit.Club, Suit.Spade];
+const rank = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'] as const;
 
 export class Deck {
     readonly deck: Array<Card> = [];
     constructor() {
-      suits.forEach((suit: AnySuit) => {
+      suits.forEach((suit: Suit) => {
         this.createDeck();
       });
     }
     createDeck(): void {
       this.deck.length = 0;
-      suits.forEach((suit: AnySuit) => {
+      suits.forEach((suit: Suit) => {
         rank.forEach((card: AnyRank) => {
           this.deck.push(new Card(suit, card));
         });

@@ -2,6 +2,7 @@ import {observer} from 'mobx-react-lite';
 import styled from 'styled-components';
 import {GameStatus} from '../app/enums';
 import {PlayerHand} from '../app/PlayerHand';
+import {useStore} from '../store';
 import GameButtons from './Buttons/GameButtons';
 import HandResult from './HandResult';
 import Score from './Score';
@@ -31,6 +32,8 @@ left: 1.4em;
 `;
 
 export default observer(({playerHand, dealerHand, gameStatus}: PlayerProps) => {
+  const gameStore = useStore('Game');
+
   const top = 80 + (playerHand.placeId % 2 === 0 ? 0 : 6);
   const left = 22 + (playerHand.placeId * 20);
   return (
@@ -45,7 +48,7 @@ export default observer(({playerHand, dealerHand, gameStatus}: PlayerProps) => {
           result={playerHand.result(dealerHand)}
         />
       </StyledResult>
-      <GameButtons placeId={playerHand.placeId} handIdx={playerHand.idx} />
+      {gameStore.isPlayingPlayer && <GameButtons placeId={playerHand.placeId} handIdx={playerHand.idx} />}
     </Styled>
   );
 });

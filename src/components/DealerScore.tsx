@@ -5,16 +5,19 @@ import {ScoreContainer} from './Score';
 export default observer(() => {
   const gameStore = useStore('Game');
   const {hand} = gameStore.dealer;
-  // todo rewrite
+
+  if (gameStore.isBetsOpen) {
+    return null;
+  }
+
+  const score = gameStore.isResolved ? hand.score : hand.getFullScore();
   return (
     <>{
-      gameStore.status > 1 ?
-        <ScoreContainer
-          style={{position: 'absolute', left: '50%', top: '35%', zIndex: 3}}
-        >
-          {gameStore.status === 2 ? hand.score : hand.getFullScore()}
-        </ScoreContainer > :
-        null
+      <ScoreContainer
+        style={{position: 'absolute', left: '50%', top: '35%', zIndex: 3}}
+      >
+        {score}
+      </ScoreContainer >
     }
     </>
   );

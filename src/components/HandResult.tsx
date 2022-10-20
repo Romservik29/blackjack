@@ -25,10 +25,13 @@ const Result = styled.div`
   justify-content: center;
 `;
 export default function HandResult({result, gameStatus, ...props}: HandResultPros) {
-  return (gameStatus === GameStatus.CALC_FINAL_RESULT ?
-        <Result {...props}>
-          {RESULTS[result]}
-        </Result> :
-        null
+  if (gameStatus !== GameStatus.Resolved) {
+    return null;
+  }
+
+  return (
+    <Result {...props}>
+      {RESULTS[result]}
+    </Result>
   );
 }

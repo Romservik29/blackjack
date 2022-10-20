@@ -39,6 +39,7 @@ export default observer(({placeId, handIdx}: GameButtonsProps) => {
     gameStore.stand(placeId, handIdx);
   }
   const isStand = gameStore.getPlace(placeId).hands[handIdx].isStandOrOver;
+  console.log(gameStore.status);
   return (
     <GameButtonsContainer>
       {isStand ?

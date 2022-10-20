@@ -6,10 +6,6 @@ import PlayerPlace from './PlayerPlace';
 export default observer(() => {
   const gameStore = useStore('Game');
 
-  if (gameStore.status < 2) {
-    return null;
-  }
-
   return <>{
     gameStore
         .handsHasBet

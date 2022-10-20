@@ -1,7 +1,7 @@
 import {GameStatus, GameResult} from './enums';
 import {PlayerHand} from './PlayerHand';
 import {TablePlace} from './TablePlace';
-import {makeAutoObservable, reaction} from 'mobx';
+import {action, makeAutoObservable, reaction} from 'mobx';
 import {Dealer} from './Dealer';
 import {Deck} from './Deck';
 import {Player} from './Player';
@@ -28,13 +28,15 @@ export class Game {
     this.players.push(this.player);
     this.dealer = new Dealer(dealerName);
     this.deck = new Deck();
-    this.status = GameStatus.WAITING_BETS;
+    this.status = GameStatus.BetsOpen;
     this.setTimer(10);
-    makeAutoObservable(this);
+    makeAutoObservable(this, {
+      deal: action.bound,
+    });
     reaction(
         () => this.timer,
         (timer) => {
-          if (timer < 0 && this.status === GameStatus.WAITING_BETS) {
+          if (timer < 0 && this.isBetsOpen) {
             if (this.hasBet) {
               this.deal();
             } else {
@@ -69,6 +71,7 @@ export class Game {
   get placeHasBet(): Array<TablePlace> {
     return this.places.filter((place) => place.bet > 0);
   }
+
   setTimer(time: number): void {
     if (this.interval) {
       clearInterval(this.interval);
@@ -84,6 +87,23 @@ export class Game {
   setStatus(status: GameStatus) {
     this.status = status;
   }
+
+  get isDealingStatus() {
+    return this.status === GameStatus.Dealing;
+  }
+
+  get isBetsOpen() {
+    return this.status === GameStatus.BetsOpen;
+  }
+
+  get isResolved() {
+    return this.status === GameStatus.Resolved;
+  }
+
+  get isPlayingPlayer() {
+    return this.status === GameStatus.PlayingPlayers;
+  }
+
   getPlace(placeId: number): TablePlace {
     const place = this.places.find((place) => place.id === placeId);
     if (place) {
@@ -159,7 +179,7 @@ export class Game {
     return this.places.some((place) => place.bet > 0);
   }
   deal(): void {
-    this.status = GameStatus.DEALING;
+    this.status = GameStatus.Dealing;
     this.places.forEach((place) => {
       if (place.playerID !== null && place.bet > 0) {
         const hand = new PlayerHand(place.id, place.hands.length);
