@@ -1,5 +1,6 @@
 import {PlayerHand} from './PlayerHand';
 
+// TODO: Rewatch
 export class Dealer {
     readonly hand: PlayerHand;
     readonly id: string = 'dealer';

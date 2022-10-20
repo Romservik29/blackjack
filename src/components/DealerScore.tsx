@@ -5,11 +5,11 @@ import {ScoreContainer} from './Score';
 export default observer(() => {
   const gameStore = useStore('Game');
   const {hand} = gameStore.dealer;
-
+  // todo rewrite
   return (
     <>{
       gameStore.status > 1 ?
-        < ScoreContainer
+        <ScoreContainer
           style={{position: 'absolute', left: '50%', top: '35%', zIndex: 3}}
         >
           {gameStore.status === 2 ? hand.score : hand.getFullScore()}

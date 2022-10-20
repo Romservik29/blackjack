@@ -4,15 +4,20 @@ import GameButtons from './Buttons/GameButtons';
 
 export default observer(() => {
   const gameStore = useStore('Game');
+
+  if (gameStore.status < 2) {
+    return null;
+  }
+
   return (
     <>
-      {gameStore.status > 1 &&
-                gameStore.handsHasBet.map((hand, idx) =>
-                  <GameButtons
-                    key={idx}
-                    placeId={hand.placeId}
-                    handIdx={hand.idx}
-                  />)
+      {
+        gameStore.handsHasBet.map((hand, idx) =>
+          <GameButtons
+            key={idx}
+            placeId={hand.placeId}
+            handIdx={hand.idx}
+          />)
       }
     </>
   );

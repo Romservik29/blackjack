@@ -5,18 +5,22 @@ import PlayerPlace from './PlayerPlace';
 
 export default observer(() => {
   const gameStore = useStore('Game');
+
+  if (gameStore.status < 2) {
+    return null;
+  }
+
   return <>{
-        gameStore.status > 1 ?
-            gameStore
-                .handsHasBet
-                .map(((hand, idx) =>
-                  <PlayerPlace
-                    key={idx}
-                    gameStatus={gameStore.status}
-                    playerHand={hand}
-                    dealerHand={gameStore.dealer.hand}
-                  />)) :
-            null
+    gameStore
+        .handsHasBet
+        .map(((hand, idx) =>
+          <PlayerPlace
+            key={idx}
+            gameStatus={gameStore.status}
+            playerHand={hand}
+            dealerHand={gameStore.dealer.hand}
+          />
+        ))
   }
   </>;
 });

@@ -27,6 +27,6 @@
       }
     ],
     "react/react-in-jsx-scope": "off",
-    "max-len": ["warn", {"code": 85}]
+    "max-len": ["warn", {"code": 120}]
   }
 }

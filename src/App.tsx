@@ -1,4 +1,3 @@
-import {useCallback, useLayoutEffect, useRef} from 'react';
 import './App.css';
 import {createRoom} from './blackjack';
 import {useStore} from './store';
@@ -9,6 +8,7 @@ import PlayerPlaces from './components/PlayerPlaces';
 import styled from 'styled-components';
 import DealerScore from './components/DealerScore';
 import PlaceBetItems from './components/PlaceBetItems';
+import {useCallback, useLayoutEffect, useRef} from 'react';
 
 const Container = styled.div`
 position: relative;
@@ -54,9 +54,7 @@ export default observer((): JSX.Element => {
   return (
     <div>
       <Container>
-        <canvas ref={canvasRef}
-          style={{position: 'absolute', zIndex: 1}}>
-        </canvas>
+        <canvas ref={canvasRef}style={{position: 'absolute', zIndex: 1}}></canvas>
         <div id="canvas_2d" ref={divRef} style={{position: 'absolute'}}>
           <MiddleBar />
           <BottomBar />

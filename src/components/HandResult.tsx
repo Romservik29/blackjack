@@ -7,6 +7,9 @@ interface HandResultPros {
     gameStatus: GameStatus
     style?: React.CSSProperties
 }
+
+const RESULTS = ['BJ', 'W', 'TIE', '❌'];
+
 const Result = styled.div`
   border: 2px solid yellow;
   border-radius: 50%;
@@ -22,10 +25,9 @@ const Result = styled.div`
   justify-content: center;
 `;
 export default function HandResult({result, gameStatus, ...props}: HandResultPros) {
-  const results = ['BJ', 'W', 'TIE', '❌'];
   return (gameStatus === GameStatus.CALC_FINAL_RESULT ?
         <Result {...props}>
-          {results[result]}
+          {RESULTS[result]}
         </Result> :
         null
   );

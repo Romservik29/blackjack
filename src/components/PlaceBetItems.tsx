@@ -7,9 +7,11 @@ export default observer(() => {
   const gameStore = useStore('Game');
   return (
     <>
-      {gameStore
-          .placeHasBet
-          .map((place, idx) => <PlaceBet key={idx} place={place} />)}
+      {
+        gameStore
+            .placeHasBet
+            .map((place, idx) => <PlaceBet key={idx} place={place} />)
+      }
     </>
   );
 });

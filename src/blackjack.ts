@@ -1,5 +1,4 @@
-/* eslint-disable max-len */
-/* eslint-disable new-cap*/
+/* eslint-disable new-cap */
 import {GameStatus} from './app/enums';
 import {Color} from './color';
 import {Game} from './app/game';
@@ -251,8 +250,16 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     }
     animCardStak.length = 0;
   }
+
   async function createAnimationCard(card: Mesh, position: Vector3, rotate: boolean, scene: Scene) {
-    const moveAnimation = new Animation('card-move-animation', 'position', FRAME_RATE, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
+    const moveAnimation = new Animation(
+        'card-move-animation',
+        'position',
+        FRAME_RATE,
+        Animation.ANIMATIONTYPE_VECTOR3,
+        Animation.ANIMATIONLOOPMODE_CONSTANT,
+    );
+
     const moveFrames = [];
     moveFrames.push({
       frame: 0,
@@ -272,7 +279,13 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
 
     moveAnimation.setKeys(moveFrames);
 
-    const rotateAnimation = new Animation('card-rotate-animation', 'rotation.z', FRAME_RATE, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CONSTANT);
+    const rotateAnimation = new Animation(
+        'card-rotate-animation',
+        'rotation.z', FRAME_RATE,
+        Animation.ANIMATIONTYPE_FLOAT,
+        Animation.ANIMATIONLOOPMODE_CONSTANT,
+    );
+
     const rotateFrames = [];
     rotateFrames.push({
       frame: 0,
@@ -291,7 +304,13 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     await anim.waitAsync();
   }
   async function dealerFaceUpCard(card: Mesh, scene: Scene) {
-    const moveAnimation = new Animation('card-move-animation', 'position.y', FRAME_RATE, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CONSTANT);
+    const moveAnimation = new Animation(
+        'card-move-animation',
+        'position.y',
+        FRAME_RATE,
+        Animation.ANIMATIONTYPE_FLOAT,
+        Animation.ANIMATIONLOOPMODE_CONSTANT,
+    );
     const moveFrames = [];
     const y = card.position.y;
     moveFrames.push({
@@ -309,7 +328,13 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
 
     moveAnimation.setKeys(moveFrames);
 
-    const rotateAnimation = new Animation('card-rotate-animation', 'rotation.z', FRAME_RATE, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CONSTANT);
+    const rotateAnimation = new Animation(
+        'card-rotate-animation',
+        'rotation.z',
+        FRAME_RATE,
+        Animation.ANIMATIONTYPE_FLOAT,
+        Animation.ANIMATIONLOOPMODE_CONSTANT,
+    );
     const rotateFrames = [];
     rotateFrames.push({
       frame: 0,
@@ -327,7 +352,14 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     await anim.waitAsync();
   }
   function betChipAnimation(chip: Mesh, position: Vector3, scene: Scene) {
-    const moveAnimation = new Animation('move', 'position', FRAME_RATE, Animation.ANIMATIONTYPE_VECTOR3, Animation.ANIMATIONLOOPMODE_CONSTANT);
+    const moveAnimation = new Animation(
+        'move',
+        'position',
+        FRAME_RATE,
+        Animation.ANIMATIONTYPE_VECTOR3,
+        Animation.ANIMATIONLOOPMODE_CONSTANT,
+    );
+
     const moveKeys = [];
     moveKeys.push({
       frame: 0,
@@ -339,7 +371,15 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     });
     moveAnimation.setKeys(moveKeys);
     chip.animations.push(moveAnimation);
-    const rotateAnimation = new Animation('move', 'rotation.x', FRAME_RATE, Animation.ANIMATIONTYPE_FLOAT, Animation.ANIMATIONLOOPMODE_CONSTANT);
+
+    const rotateAnimation = new Animation(
+        'move',
+        'rotation.x',
+        FRAME_RATE,
+        Animation.ANIMATIONTYPE_FLOAT,
+        Animation.ANIMATIONLOOPMODE_CONSTANT,
+    );
+
     const rotateKeys = [];
     rotateKeys.push({
       frame: 0,
@@ -430,7 +470,18 @@ export const createRoom = (canvas: HTMLCanvasElement, game: Game) => {
     const faceUV = Array(6);
     faceUV[4] = new Vector4(column * 1 / columns, 1 * row / rows, (column + 1) * 1 / columns, (row + 1) * 1 / rows);
     faceUV[5] = new Vector4(2 * 1 / columns, 1 * 5 / rows, (2 + 1) * 1 / columns, (5 + 1) * 1 / rows);
-    const card = MeshBuilder.CreateBox('card', {width: CARD_WIDTH, height: 0.001, faceUV: faceUV, depth: CARD_HEIGHT, wrap: true});
+
+    const card = MeshBuilder.CreateBox(
+        'card',
+        {
+          width: CARD_WIDTH,
+          height: 0.001,
+          faceUV: faceUV,
+          depth: CARD_HEIGHT,
+          wrap: true,
+        },
+    );
+
     card.rotation.z = Math.PI;
     card.position = position;
     card.material = mat;

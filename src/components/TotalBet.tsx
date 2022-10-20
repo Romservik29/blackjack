@@ -19,16 +19,20 @@ height: min-content;
 margin-left: 10px;
 `;
 
-export default observer((): JSX.Element => {
+export default observer(() => {
   const gameStore = useStore('Game');
+
+  if (gameStore.totalBet === 0) {
+    return null;
+  }
+
   return (
     <>
       {
-        gameStore.totalBet > 0 &&
-                <StyledCurrenBet>
-                  <span>Total</span>
-                  <span style={{color: Color.yellow}}>{gameStore.totalBet}</span>
-                </StyledCurrenBet>
+        <StyledCurrenBet>
+          <span>Total</span>
+          <span style={{color: Color.yellow}}>{gameStore.totalBet}</span>
+        </StyledCurrenBet>
       }
     </>
   );
