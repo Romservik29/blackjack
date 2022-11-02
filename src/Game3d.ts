@@ -1,3 +1,4 @@
+import {AnimationProcessor} from './transport/animationProcessor';
 /* eslint-disable new-cap */
 import {Texture} from '@babylonjs/core/Materials/Textures/texture';
 import {
@@ -10,18 +11,20 @@ import {
   StandardMaterial,
   Color3,
   Mesh,
-  DynamicTexture,
-  ExecuteCodeAction,
-  ActionManager,
+  // DynamicTexture,
+  // ExecuteCodeAction,
+  // ActionManager,
   Vector4,
-  Animation,
+  // Animation,
   HemisphericLight,
 } from '@babylonjs/core';
 import {AnyRank} from './app/Card';
 import {Suit} from './app/enums';
+import {AnimationIntegration} from './transport/animationIntegration';
 
 interface Game3DProps {
     canvas: HTMLCanvasElement;
+    animationProcessor: AnimationProcessor;
 }
 
 export const tableMeshName = 'table';
@@ -29,8 +32,8 @@ export const floorMeshName = 'floor';
 
 const CARD_WIDTH = 0.124;
 const CARD_HEIGHT = 0.18;
-const PLACE_RADIUS = 0.07;
-const FRAME_RATE = 60;
+// const PLACE_RADIUS = 0.07;
+// const FRAME_RATE = 60;
 const deckPosition = new Vector3(-0.7, 0.753, -0.4);
 
 const rowMap: Record<Suit, number> = {
@@ -50,9 +53,27 @@ const columnMap: Record<string, number> = {
 export class Game3D {
     readonly engine: Engine;
     readonly scene: Scene;
+    readonly camera: ArcRotateCamera;
+    readonly light: HemisphericLight;
+    readonly animationIntegration: AnimationIntegration;
+
     constructor(props: Game3DProps) {
       this.engine = new Engine(props.canvas);
       this.scene = new Scene(this.engine);
+      this.camera = new ArcRotateCamera('camera', Math.PI / 2, Math.PI / 8, 1.9, new Vector3(0, 0.7, 0), this.scene);
+      this.light = new HemisphericLight('light', new Vector3(0, 1, 0), this.scene);
+      this.light.intensity = 1;
+      this.camera.attachControl();
+      this.initGameRoom();
+
+      this.animationIntegration = new AnimationIntegration({
+        animationProcessor: props.animationProcessor,
+        scene: this.scene,
+      });
+
+      this.engine.runRenderLoop(() => {
+        this.scene.render();
+      });
     }
 
     public initGameRoom(): void {
@@ -73,6 +94,7 @@ function createTable(scene: Scene): Mesh {
   disc.material = mat;
   borderTable.parent = disc;
   borderTable.rotation.x = Math.PI / 2;
+  disc.position = new Vector3(0, 0.7, 0);
   return disc;
 }
 

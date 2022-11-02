@@ -1,5 +1,4 @@
 import './App.css';
-import {createRoom} from './blackjack';
 import {useStore} from './store';
 import {observer} from 'mobx-react-lite';
 import MiddleBar from './components/Bars/MiddleBar';
@@ -9,6 +8,7 @@ import styled from 'styled-components';
 import DealerScore from './components/DealerScore';
 import PlaceBetItems from './components/PlaceBetItems';
 import {useCallback, useLayoutEffect, useRef} from 'react';
+import {Game3D} from './Game3d';
 
 const Container = styled.div`
 position: relative;
@@ -45,7 +45,10 @@ export default observer((): JSX.Element => {
   useLayoutEffect(() => {
     if (canvasRef.current && divRef.current) {
       updateCanvas();
-      createRoom(canvasRef.current, gameStore);
+      new Game3D({
+        canvas: canvasRef.current,
+        animationProcessor: gameStore.animationProcessor,
+      });
     }
     window.addEventListener('resize', updateCanvas);
     return () => window.removeEventListener('resize', updateCanvas);
@@ -56,11 +59,15 @@ export default observer((): JSX.Element => {
       <Container>
         <canvas ref={canvasRef}style={{position: 'absolute', zIndex: 1}}></canvas>
         <div id="canvas_2d" ref={divRef} style={{position: 'absolute'}}>
-          <MiddleBar />
-          <BottomBar />
-          <DealerScore />
-          <PlayerPlaces />
-          <PlaceBetItems />
+          { false && (
+            <>
+              <MiddleBar />
+              <BottomBar />
+              <DealerScore />
+              <PlayerPlaces />
+              <PlaceBetItems />
+            </>
+          )}
         </div>
       </Container>
     </div>

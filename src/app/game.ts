@@ -1,3 +1,4 @@
+import {AnimationProcessor, createAnimationProcessor} from './../transport/animationProcessor';
 import {GameStatus, GameResult} from './enums';
 import {PlayerHand} from './PlayerHand';
 import {TablePlace} from './TablePlace';
@@ -22,6 +23,7 @@ export class Game {
   places: Array<TablePlace> = [];
   timer: number = 0;
   totalBet: number = 0;
+  animationProcessor: AnimationProcessor;
   private interval: number | null = null;
   constructor(dealerName: string, playerID: string, chips = 5000) {
     this.player = new Player(playerID, chips);
@@ -29,6 +31,7 @@ export class Game {
     this.dealer = new Dealer(dealerName);
     this.deck = new Deck();
     this.status = GameStatus.BetsOpen;
+    this.animationProcessor = createAnimationProcessor();
     this.setTimer(10);
     makeAutoObservable(this, {
       deal: action.bound,
